@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, addDoc, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db, getUserProfile } from '../config/firebase';
 import { Link } from 'react-router-dom';
+import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export default function Jobs() {
   const { currentUser } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     type: '',
@@ -16,7 +18,8 @@ export default function Jobs() {
     remoteType: 'no_preference',
     description: '',
     requirements: '',
-    salary: ''
+    salary: '',
+    contactInfo: ''
   });
   const [userProfile, setUserProfile] = useState(null);
 
@@ -53,18 +56,46 @@ export default function Jobs() {
     }
   };
 
+  const handleEdit = (job) => {
+    setEditingJob(job);
+    setFormData({
+      title: job.title,
+      type: job.type,
+      location: job.location,
+      remoteType: job.remoteType,
+      description: job.description,
+      requirements: job.requirements,
+      salary: job.salary || '',
+      contactInfo: job.contactInfo || ''
+    });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const jobsRef = collection(db, 'jobs');
-      await addDoc(jobsRef, {
-        ...formData,
-        createdBy: currentUser.uid,
-        companyName: userProfile?.profileType === 'company' ? userProfile.companyName : userProfile.name,
-        createdAt: serverTimestamp(),
-      });
+      if (editingJob) {
+        // Update existing job
+        const jobRef = doc(db, 'jobs', editingJob.id);
+        await updateDoc(jobRef, {
+          ...formData,
+          updatedAt: serverTimestamp(),
+        });
+        alert('Job updated successfully!');
+      } else {
+        // Create new job
+        const jobsRef = collection(db, 'jobs');
+        await addDoc(jobsRef, {
+          ...formData,
+          createdBy: currentUser.uid,
+          companyName: userProfile?.profileType === 'company' ? userProfile.companyName : userProfile.name,
+          createdAt: serverTimestamp(),
+        });
+        alert('Job posted successfully!');
+      }
 
       setFormData({
         title: '',
@@ -73,17 +104,55 @@ export default function Jobs() {
         remoteType: 'no_preference',
         description: '',
         requirements: '',
-        salary: ''
+        salary: '',
+        contactInfo: ''
       });
       setShowForm(false);
+      setEditingJob(null);
       await fetchData();
-      alert('Job posted successfully!');
     } catch (error) {
-      console.error('Error posting job:', error);
-      alert('Failed to post job. Please try again.');
+      console.error('Error saving job:', error);
+      alert('Failed to save job. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = async (jobId, createdBy) => {
+    // Only allow deletion if the current user is the creator
+    if (createdBy !== currentUser.uid) {
+      alert('You can only delete your own job posts.');
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to delete this job post?')) {
+      try {
+        setLoading(true);
+        await deleteDoc(doc(db, 'jobs', jobId));
+        await fetchData(); // Refresh the jobs list
+        alert('Job post deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        alert('Failed to delete job post. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      title: '',
+      type: '',
+      location: '',
+      remoteType: 'no_preference',
+      description: '',
+      requirements: '',
+      salary: '',
+      contactInfo: ''
+    });
+    setShowForm(false);
+    setEditingJob(null);
   };
 
   if (loading) {
@@ -98,17 +167,21 @@ export default function Jobs() {
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Jobs</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-        >
-          {showForm ? 'Cancel' : 'Post Job'}
-        </button>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          >
+            Post Job
+          </button>
+        )}
       </div>
 
       {showForm && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Post New Job</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            {editingJob ? 'Edit Job Post' : 'Create New Job Post'}
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Job Title</label>
@@ -196,13 +269,35 @@ export default function Jobs() {
               />
             </div>
 
-            <div className="pt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Contact Information</label>
+              <input
+                type="text"
+                value={formData.contactInfo}
+                onChange={(e) => setFormData(prev => ({ ...prev, contactInfo: e.target.value }))}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Email or phone number for applications"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                How should candidates contact you about this position?
+              </p>
+            </div>
+
+            <div className="pt-4 flex space-x-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
+                onClick={handleSubmit}
+                className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
               >
-                {loading ? 'Posting...' : 'Post Job'}
+                {loading ? 'Saving...' : (editingJob ? 'Update Job' : 'Post Job')}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Cancel
               </button>
             </div>
           </form>
@@ -227,9 +322,29 @@ export default function Jobs() {
                   </span>
                 </div>
               </div>
-              {job.salary && (
-                <span className="text-sm text-gray-600">{job.salary}</span>
-              )}
+              <div className="flex items-center space-x-2">
+                {job.salary && (
+                  <span className="text-sm text-gray-600">{job.salary}</span>
+                )}
+                {job.createdBy === currentUser.uid && (
+                  <>
+                    <button
+                      onClick={() => handleEdit(job)}
+                      className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50"
+                      title="Edit job post"
+                    >
+                      <PencilIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(job.id, job.createdBy)}
+                      className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
+                      title="Delete job post"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
             
             <div className="prose prose-sm max-w-none mt-4">
@@ -238,6 +353,13 @@ export default function Jobs() {
               
               <h4 className="text-sm font-medium text-gray-900 mt-4">Requirements</h4>
               <p className="mt-2 text-sm text-gray-600">{job.requirements}</p>
+
+              {job.contactInfo && (
+                <>
+                  <h4 className="text-sm font-medium text-gray-900 mt-4">Contact</h4>
+                  <p className="mt-2 text-sm text-gray-600">{job.contactInfo}</p>
+                </>
+              )}
             </div>
 
             <div className="mt-4">
