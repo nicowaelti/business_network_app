@@ -25,6 +25,7 @@ export default function Layout({ children }) {
     { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
     { name: 'Companies', href: '/companies', icon: UserGroupIcon },
     { name: 'Availability Posts', href: '/availability-posts', icon: CalendarIcon },
+    { name: 'Events', href: '/events', icon: CalendarIcon },
   ];
 
   // Add Profile link only if we have a currentUser with uid

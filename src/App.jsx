@@ -8,6 +8,7 @@ import Companies from './pages/Companies';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import AvailabilityPosts from './pages/AvailabilityPosts';
+import Events from './pages/Events';
 import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
 import { db } from './config/firebase';
 import { useState, useEffect } from 'react';
@@ -27,11 +28,23 @@ const ProtectedRoute = ({ children }) => {
 const Dashboard = () => {
   const [recentJobs, setRecentJobs] = useState([]);
   const [recentAvailability, setRecentAvailability] = useState([]);
+  const [futureEvents, setFutureEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRecentData = async () => {
       try {
+        // Fetch future events
+        const eventsRef = collection(db, 'events');
+        const eventsQuery = query(
+          eventsRef,
+          where('date', '>=', new Date().toISOString().split('T')[0]), // Only future events
+          orderBy('date', 'asc')
+        );
+        const eventsSnapshot = await getDocs(eventsQuery);
+        const eventsList = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setFutureEvents(eventsList);
+
         // Fetch recent jobs
         const jobsRef = collection(db, 'jobs');
         const jobsQuery = query(
@@ -75,6 +88,28 @@ const Dashboard = () => {
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
+
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-2">Upcoming Events</h3>
+        {futureEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {futureEvents.map(event => (
+              <div key={event.id} className="bg-white shadow-md rounded-lg p-4">
+                <h4 className="text-lg font-semibold">{event.title}</h4>
+                <p className="text-sm text-gray-600">{new Date(event.date).toLocaleDateString()} • {event.location}</p>
+                <p className="text-sm text-gray-600">{event.description}</p>
+                <div className="mt-2">
+                  <a href={`/profile/${event.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
+                    View Creator's Profile
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>No upcoming events.</p>
+        )}
+      </div>
       
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-2">New Job Posts</h3>
@@ -190,6 +225,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AvailabilityPosts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <Events />
               </ProtectedRoute>
             }
           />
