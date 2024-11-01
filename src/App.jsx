@@ -86,11 +86,11 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-gray-50 p-6">
       <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
 
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Upcoming Events</h3>
+      <div className="mb-8 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg shadow-sm">
+        <h3 className="text-xl font-semibold mb-2 text-blue-800">Upcoming Events</h3>
         {futureEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {futureEvents.map(event => (
@@ -111,8 +111,8 @@ const Dashboard = () => {
         )}
       </div>
       
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">New Job Posts</h3>
+      <div className="mb-8 p-4 bg-green-50 border-l-4 border-green-400 rounded-lg shadow-sm">
+        <h3 className="text-xl font-semibold mb-2 text-green-800">New Job Posts</h3>
         {recentJobs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentJobs.map(job => (
@@ -142,8 +142,8 @@ const Dashboard = () => {
         )}
       </div>
 
-      <div>
-        <h3 className="text-xl font-semibold mb-2">Recent Availability Posts</h3>
+      <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm">
+        <h3 className="text-xl font-semibold mb-2 text-yellow-800">Recent Availability Posts</h3>
         {recentAvailability.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentAvailability.map(post => (
