@@ -362,9 +362,15 @@ export default function Jobs() {
               )}
             </div>
 
-            <div className="mt-4">
+            <div className="mt-4 flex items-center justify-between">
               <Link to={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
                 View Creator's Profile
+              </Link>
+              <Link 
+                to={`/jobs/${job.id}`}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                View Details →
               </Link>
             </div>
           </div>

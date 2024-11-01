@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
@@ -9,6 +9,8 @@ import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import AvailabilityPosts from './pages/AvailabilityPosts';
 import Events from './pages/Events';
+import JobDetail from './pages/JobDetail';
+import AvailabilityPostDetail from './pages/AvailabilityPostDetail';
 import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
 import { db } from './config/firebase';
 import { useState, useEffect } from 'react';
@@ -99,9 +101,9 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-600">{new Date(event.date).toLocaleDateString()} • {event.location}</p>
                 <p className="text-sm text-gray-600">{event.description}</p>
                 <div className="mt-2">
-                  <a href={`/profile/${event.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
+                  <Link to={`/profile/${event.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
                     View Creator's Profile
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -129,10 +131,16 @@ const Dashboard = () => {
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-gray-600 line-clamp-3">{job.description}</p>
-                <div className="mt-2">
-                  <a href={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
+                <div className="mt-4 flex items-center justify-between">
+                  <Link to={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
                     View Creator's Profile
-                  </a>
+                  </Link>
+                  <Link 
+                    to={`/jobs/${job.id}`}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    View Details →
+                  </Link>
                 </div>
               </div>
             ))}
@@ -154,10 +162,16 @@ const Dashboard = () => {
                 </p>
                 <p className="text-sm text-gray-600">Location: {post.location || 'N/A'}</p>
                 <p className="text-sm text-gray-600">Contact: {post.contactInfo || 'N/A'}</p>
-                <div className="mt-2">
-                  <a href={`/profile/${post.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
+                <div className="mt-4 flex items-center justify-between">
+                  <Link to={`/profile/${post.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
                     View Creator's Profile
-                  </a>
+                  </Link>
+                  <Link 
+                    to={`/availability-posts/${post.id}`}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    View Details →
+                  </Link>
                 </div>
               </div>
             ))}
@@ -233,6 +247,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Events />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jobs/:jobId"
+            element={
+              <ProtectedRoute>
+                <JobDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/availability-posts/:postId"
+            element={
+              <ProtectedRoute>
+                <AvailabilityPostDetail />
               </ProtectedRoute>
             }
           />
