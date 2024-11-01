@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { collection, addDoc, getDocs, query, orderBy, where } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { collection, addDoc, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { db, getUserProfile } from '../config/firebase';
+import { Link } from 'react-router-dom';
 
 export default function Jobs() {
   const { currentUser } = useAuth();
   const [jobs, setJobs] = useState([]);
-  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    companyId: '',
     type: '',
     location: '',
     remoteType: 'no_preference',
@@ -19,36 +18,38 @@ export default function Jobs() {
     requirements: '',
     salary: ''
   });
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchUserProfile();
   }, []);
 
   const fetchData = async () => {
     try {
-      // Fetch companies first
-      const companiesRef = collection(db, 'companies');
-      const companiesSnapshot = await getDocs(query(companiesRef, orderBy('name')));
-      const companiesList = companiesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setCompanies(companiesList);
-
-      // Then fetch jobs
       const jobsRef = collection(db, 'jobs');
       const jobsSnapshot = await getDocs(query(jobsRef, orderBy('createdAt', 'desc')));
       const jobsList = jobsSnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
-        company: companiesList.find(c => c.id === doc.data().companyId)
+        ...doc.data()
       }));
       setJobs(jobsList);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      alert('Failed to load data');
+      console.error('Error fetching jobs:', error);
+      alert('Failed to load jobs');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    if (currentUser) {
+      try {
+        const profile = await getUserProfile(currentUser.uid);
+        setUserProfile(profile);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
     }
   };
 
@@ -61,12 +62,12 @@ export default function Jobs() {
       await addDoc(jobsRef, {
         ...formData,
         createdBy: currentUser.uid,
-        createdAt: new Date().toISOString()
+        companyName: userProfile?.profileType === 'company' ? userProfile.companyName : userProfile.name,
+        createdAt: serverTimestamp(),
       });
 
       setFormData({
         title: '',
-        companyId: '',
         type: '',
         location: '',
         remoteType: 'no_preference',
@@ -118,23 +119,6 @@ export default function Jobs() {
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Company</label>
-              <select
-                required
-                value={formData.companyId}
-                onChange={(e) => setFormData(prev => ({ ...prev, companyId: e.target.value }))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="">Select company</option>
-                {companies.map(company => (
-                  <option key={company.id} value={company.id}>
-                    {company.name}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <div>
@@ -232,7 +216,7 @@ export default function Jobs() {
               <div>
                 <h3 className="text-lg font-semibold mb-2">{job.title}</h3>
                 <p className="text-sm text-gray-600 mb-2">
-                  {job.company?.name} • {job.location}
+                  {job.companyName} • {job.location}
                 </p>
                 <div className="flex space-x-2 mb-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -254,6 +238,12 @@ export default function Jobs() {
               
               <h4 className="text-sm font-medium text-gray-900 mt-4">Requirements</h4>
               <p className="mt-2 text-sm text-gray-600">{job.requirements}</p>
+            </div>
+
+            <div className="mt-4">
+              <Link to={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
+                View Creator's Profile
+              </Link>
             </div>
           </div>
         ))}

@@ -1,162 +1,221 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { useAuth } from '../contexts/AuthContext';
+import { useParams, Navigate, useNavigate } from 'react-router-dom';
 
 export default function Profile() {
   const { currentUser } = useAuth();
+  const { userId } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [availability, setAvailability] = useState({
-    status: 'not_available', // not_available, actively_looking, open_to_offers
-    availableFrom: '',
-    jobTypes: [],
-    location: '',
-    remotePreference: 'no_preference' // no_preference, remote_only, hybrid, on_site
-  });
+  const [profileData, setProfileData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (currentUser) {
-        const docRef = doc(db, 'users', currentUser.uid);
+      if (!userId) {
+        setError('User ID is required');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const docRef = doc(db, 'users', userId);
         const docSnap = await getDoc(docRef);
         
-        if (docSnap.exists() && docSnap.data().availability) {
-          setAvailability(docSnap.data().availability);
+        if (docSnap.exists()) {
+          setProfileData(docSnap.data());
+        } else {
+          // If it's the current user's profile and it doesn't exist, redirect to edit
+          if (currentUser && userId === currentUser.uid) {
+            navigate('/profile/edit');
+            return;
+          }
+          setError('Profile not found. Please ensure you have completed your profile setup.');
         }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setError('Failed to load profile data');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchProfile();
-  }, [currentUser]);
+  }, [userId, currentUser, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const userRef = doc(db, 'users', currentUser.uid);
-      await setDoc(userRef, { availability }, { merge: true });
-      alert('Profile updated successfully!');
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleJobTypeToggle = (type) => {
-    setAvailability(prev => ({
-      ...prev,
-      jobTypes: prev.jobTypes.includes(type)
-        ? prev.jobTypes.filter(t => t !== type)
-        : [...prev.jobTypes, type]
-    }));
-  };
+  // Redirect to dashboard if userId is not available
+  if (!userId) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
-  return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Profile Settings</h1>
-      
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Availability Settings</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Availability Status
-            </label>
-            <select
-              value={availability.status}
-              onChange={(e) => setAvailability(prev => ({ ...prev, status: e.target.value }))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto p-4">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+          <p className="text-red-700">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div className="max-w-2xl mx-auto p-4">
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+          <p className="text-yellow-700">No profile data available. Please complete your profile setup.</p>
+          {currentUser && userId === currentUser.uid && (
+            <button
+              onClick={() => navigate('/profile/edit')}
+              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <option value="not_available">Not Available</option>
-              <option value="actively_looking">Actively Looking</option>
-              <option value="open_to_offers">Open to Offers</option>
-            </select>
-          </div>
+              Create Profile
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
+  const FreelancerProfile = () => (
+    <div className="space-y-6">
+      <div className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Available From
-            </label>
-            <input
-              type="date"
-              value={availability.availableFrom}
-              onChange={(e) => setAvailability(prev => ({ ...prev, availableFrom: e.target.value }))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
+            <label className="block text-sm font-medium text-gray-600">Full Name</label>
+            <p className="mt-1">{profileData.name}</p>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Job Types
-            </label>
-            <div className="space-y-2">
-              {['Full-time', 'Part-time', 'Contract', 'Freelance'].map((type) => (
-                <label key={type} className="inline-flex items-center mr-4">
-                  <input
-                    type="checkbox"
-                    checked={availability.jobTypes.includes(type)}
-                    onChange={() => handleJobTypeToggle(type)}
-                    className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                  <span className="ml-2">{type}</span>
-                </label>
-              ))}
+            <label className="block text-sm font-medium text-gray-600">Title</label>
+            <p className="mt-1">{profileData.title || 'Not specified'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Location</label>
+            <p className="mt-1">{profileData.location || 'Not specified'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Email</label>
+            <p className="mt-1">{profileData.email}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Professional Details</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Skills</label>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {profileData.skills?.map((skill, index) => (
+                <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  {skill}
+                </span>
+              )) || 'No skills listed'}
             </div>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Preferred Location
-            </label>
-            <input
-              type="text"
-              value={availability.location}
-              onChange={(e) => setAvailability(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="e.g., Zurich, Switzerland"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            />
+            <label className="block text-sm font-medium text-gray-600">Experience</label>
+            <p className="mt-1 whitespace-pre-line">{profileData.experience || 'No experience listed'}</p>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Remote Work Preference
-            </label>
-            <select
-              value={availability.remotePreference}
-              onChange={(e) => setAvailability(prev => ({ ...prev, remotePreference: e.target.value }))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="no_preference">No Preference</option>
-              <option value="remote_only">Remote Only</option>
-              <option value="hybrid">Hybrid</option>
-              <option value="on_site">On-Site</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-600">Education</label>
+            <p className="mt-1">{profileData.education || 'No education listed'}</p>
           </div>
-
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
+
+      {profileData.portfolio && (
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Portfolio</h2>
+          <a href={profileData.portfolio} target="_blank" rel="noopener noreferrer" 
+             className="text-blue-600 hover:text-blue-800">
+            View Portfolio →
+          </a>
+        </div>
+      )}
+    </div>
+  );
+
+  const CompanyProfile = () => (
+    <div className="space-y-6">
+      <div className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Company Information</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Company Name</label>
+            <p className="mt-1">{profileData.companyName}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Industry</label>
+            <p className="mt-1">{profileData.industry || 'Not specified'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Company Size</label>
+            <p className="mt-1">{profileData.companySize || 'Not specified'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Year Established</label>
+            <p className="mt-1">{profileData.yearEstablished || 'Not specified'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Business Details</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Services</label>
+            <p className="mt-1 whitespace-pre-line">{profileData.services || 'No services listed'}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600">Products</label>
+            <p className="mt-1 whitespace-pre-line">{profileData.products || 'No products listed'}</p>
+          </div>
+        </div>
+      </div>
+
+      {profileData.website && (
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Website</h2>
+          <a href={profileData.website} target="_blank" rel="noopener noreferrer" 
+             className="text-blue-600 hover:text-blue-800">
+            Visit Website →
+          </a>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+      <div className="mb-8 flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900">
+          {profileData.profileType === 'company' ? profileData.companyName : profileData.name}
+        </h1>
+        {currentUser && userId === currentUser.uid && (
+          <button
+            onClick={() => navigate('/profile/edit')}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Edit Profile
+          </button>
+        )}
+      </div>
+      <p className="text-gray-600 mt-2 mb-6">
+        {profileData.profileType === 'company' ? 'Company Profile' : 'Freelancer Profile'}
+      </p>
+
+      {profileData.profileType === 'freelancer' ? <FreelancerProfile /> : <CompanyProfile />}
     </div>
   );
 }

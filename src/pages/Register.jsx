@@ -8,7 +8,7 @@ export default function Register() {
     email: '',
     password: '',
     confirmPassword: '',
-    userType: 'regular' // regular, company, or admin
+    userType: 'freelancer' // freelancer or company
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,11 +36,15 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await registerUser(formData.email, formData.password);
-      // If registration successful, redirect to dashboard
-      navigate('/dashboard');
+      await registerUser(formData.email, formData.password, formData.userType);
+      // After successful registration, redirect to profile edit page
+      navigate('/profile/edit');
     } catch (err) {
-      setError('Failed to create an account. ' + err.message);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email is already in use. Please use a different email.');
+      } else {
+        setError('Failed to create an account. ' + err.message);
+      }
       console.error(err);
     } finally {
       setLoading(false);
@@ -53,6 +57,9 @@ export default function Register() {
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Create your account
         </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Join our professional network
+        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -65,7 +72,23 @@ export default function Register() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="form-label">
+              <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
+                I am a
+              </label>
+              <select
+                id="userType"
+                name="userType"
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                value={formData.userType}
+                onChange={handleChange}
+              >
+                <option value="freelancer">Freelancer</option>
+                <option value="company">Company</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
               <input
@@ -74,14 +97,14 @@ export default function Register() {
                 type="email"
                 autoComplete="email"
                 required
-                className="input-field"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 value={formData.email}
                 onChange={handleChange}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="form-label">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
               <input
@@ -90,14 +113,14 @@ export default function Register() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="input-field"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 value={formData.password}
                 onChange={handleChange}
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="form-label">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Confirm Password
               </label>
               <input
@@ -106,33 +129,19 @@ export default function Register() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="input-field"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 value={formData.confirmPassword}
                 onChange={handleChange}
               />
             </div>
 
             <div>
-              <label htmlFor="userType" className="form-label">
-                Account Type
-              </label>
-              <select
-                id="userType"
-                name="userType"
-                className="input-field"
-                value={formData.userType}
-                onChange={handleChange}
-              >
-                <option value="regular">Freelancer</option>
-                <option value="company">Company</option>
-              </select>
-            </div>
-
-            <div>
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full btn-primary ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 {loading ? 'Creating account...' : 'Create account'}
               </button>
