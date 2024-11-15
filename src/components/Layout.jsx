@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Dialog as HeadlessDialog, Transition } from '@headlessui/react';
+import { Dialog, Transition } from '@headlessui/react';
 import {
   HomeIcon,
   UserGroupIcon,
@@ -23,14 +23,14 @@ export default function Layout({ children }) {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
-    { name: 'Companies', href: '/companies', icon: UserGroupIcon },
-    { name: 'Availability Posts', href: '/availability-posts', icon: CalendarIcon },
+    { name: 'Verfügbare Kapazitäten', href: '/availability-posts', icon: CalendarIcon },
     { name: 'Events', href: '/events', icon: CalendarIcon },
+    { name: 'Members', href: '/companies', icon: UserGroupIcon },
   ];
 
-  // Add Profile link only if we have a currentUser with uid
+  // Only include the Profile link if the user is logged in
   if (currentUser?.uid) {
-    navigation.push({ name: 'Profile', href: `/profile/${currentUser.uid}`, icon: UserIcon });
+    navigation.push({ name: 'Mein Profil', href: `/profile/${currentUser.uid}`, icon: UserIcon });
   }
 
   const handleLogout = async () => {
@@ -45,7 +45,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-gray-100">
       <Transition.Root show={sidebarOpen} as={Fragment}>
-        <HeadlessDialog as="div" className="fixed inset-0 flex z-40 md:hidden" onClose={setSidebarOpen}>
+        <Dialog as="div" className="fixed inset-0 flex z-40 md:hidden" onClose={setSidebarOpen}>
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -55,7 +55,7 @@ export default function Layout({ children }) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <HeadlessDialog.Overlay className="fixed inset-0 bg-gray-600 bg-opacity-75" />
+            <Dialog.Overlay className="fixed inset-0 bg-gray-600 bg-opacity-75" />
           </Transition.Child>
           <Transition.Child
             as={Fragment}
@@ -94,7 +94,7 @@ export default function Layout({ children }) {
                     src={networkLogo}
                     alt="Business Network"
                   />
-                  <h1 className="text-xl font-semibold text-gray-900">Berner Netzwercher</h1>
+                  <h1 className="text-xl font-semibold text-gray-900">Bärner Netzwärcher</h1>
                 </div>
                 <nav className="mt-5 px-2 space-y-1">
                   {navigation.map((item) => (
@@ -137,7 +137,7 @@ export default function Layout({ children }) {
             </div>
           </Transition.Child>
           <div className="flex-shrink-0 w-14">{/* Force sidebar to shrink to fit close icon */}</div>
-        </HeadlessDialog>
+        </Dialog>
       </Transition.Root>
 
       {/* Static sidebar for desktop */}
@@ -150,7 +150,7 @@ export default function Layout({ children }) {
                 src={networkLogo}
                 alt="Business Network"
               />
-              <h1 className="text-xl font-semibold text-gray-900">Berner Netzwercher</h1>
+              <h1 className="text-xl font-semibold text-gray-900">Bärner Netzwärcher</h1>
             </div>
             <nav className="mt-5 flex-1 px-2 bg-white space-y-1">
               {navigation.map((item) => (

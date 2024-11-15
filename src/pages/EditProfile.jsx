@@ -48,7 +48,7 @@ export default function EditProfile() {
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        setError('Failed to load profile data');
+        setError('Profildaten konnten nicht geladen werden');
       } finally {
         setLoading(false);
       }
@@ -84,7 +84,7 @@ export default function EditProfile() {
       navigate(`/profile/${currentUser.uid}`);
     } catch (err) {
       console.error('Error saving profile:', err);
-      setError('Failed to save profile. Please try again.');
+      setError('Profil konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.');
     } finally {
       setSaving(false);
     }
@@ -101,7 +101,7 @@ export default function EditProfile() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">
-        {formData.profileType === 'company' ? 'Edit Company Profile' : 'Edit Profile'}
+        {formData.profileType === 'company' ? 'Unternehmensprofil bearbeiten' : 'Profil bearbeiten'}
       </h1>
 
       {error && (
@@ -112,25 +112,25 @@ export default function EditProfile() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Profile Type</h2>
+          <h2 className="text-xl font-semibold mb-4">Profiltyp</h2>
           <select
             name="profileType"
             value={formData.profileType}
             onChange={handleChange}
             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
           >
-            <option value="freelancer">Freelancer</option>
-            <option value="company">Company</option>
+            <option value="freelancer">Freiberufler</option>
+            <option value="company">Unternehmen</option>
           </select>
         </div>
 
         {formData.profileType === 'freelancer' ? (
           <>
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+              <h2 className="text-xl font-semibold mb-4">Persönliche Informationen</h2>
               <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Vollständiger Name</label>
                   <input
                     type="text"
                     name="name"
@@ -141,7 +141,7 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Title</label>
+                  <label className="block text-sm font-medium text-gray-700">Titel</label>
                   <input
                     type="text"
                     name="title"
@@ -151,7 +151,7 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Location</label>
+                  <label className="block text-sm font-medium text-gray-700">Standort</label>
                   <input
                     type="text"
                     name="location"
@@ -164,21 +164,21 @@ export default function EditProfile() {
             </div>
 
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Professional Details</h2>
+              <h2 className="text-xl font-semibold mb-4">Berufliche Details</h2>
               <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Skills (comma-separated)</label>
+                  <label className="block text-sm font-medium text-gray-700">Fähigkeiten (durch Komma getrennt)</label>
                   <input
                     type="text"
                     name="skills"
                     value={formData.skills}
                     onChange={handleChange}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="e.g., JavaScript, React, Node.js"
+                    placeholder="z.B. JavaScript, React, Node.js"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Experience</label>
+                  <label className="block text-sm font-medium text-gray-700">Erfahrung</label>
                   <textarea
                     name="experience"
                     value={formData.experience}
@@ -188,7 +188,7 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Education</label>
+                  <label className="block text-sm font-medium text-gray-700">Ausbildung</label>
                   <textarea
                     name="education"
                     value={formData.education}
@@ -198,7 +198,7 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Portfolio URL</label>
+                  <label className="block text-sm font-medium text-gray-700">Portfolio-URL</label>
                   <input
                     type="url"
                     name="portfolio"
@@ -213,10 +213,10 @@ export default function EditProfile() {
         ) : (
           <>
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Company Information</h2>
+              <h2 className="text-xl font-semibold mb-4">Unternehmensinformationen</h2>
               <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Unternehmensname</label>
                   <input
                     type="text"
                     name="companyName"
@@ -227,7 +227,7 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Industry</label>
+                  <label className="block text-sm font-medium text-gray-700">Branche</label>
                   <input
                     type="text"
                     name="industry"
@@ -237,18 +237,18 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Company Size</label>
+                  <label className="block text-sm font-medium text-gray-700">Unternehmensgröße</label>
                   <input
                     type="text"
                     name="companySize"
                     value={formData.companySize}
                     onChange={handleChange}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="e.g., 1-10, 11-50, 51-200"
+                    placeholder="z.B. 1-10, 11-50, 51-200"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Year Established</label>
+                  <label className="block text-sm font-medium text-gray-700">Gründungsjahr</label>
                   <input
                     type="text"
                     name="yearEstablished"
@@ -261,10 +261,10 @@ export default function EditProfile() {
             </div>
 
             <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Business Details</h2>
+              <h2 className="text-xl font-semibold mb-4">Geschäftsdetails</h2>
               <div className="grid grid-cols-1 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Services</label>
+                  <label className="block text-sm font-medium text-gray-700">Dienstleistungen</label>
                   <textarea
                     name="services"
                     value={formData.services}
@@ -274,7 +274,7 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Products</label>
+                  <label className="block text-sm font-medium text-gray-700">Produkte</label>
                   <textarea
                     name="products"
                     value={formData.products}
@@ -284,7 +284,7 @@ export default function EditProfile() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Website</label>
+                  <label className="block text-sm font-medium text-gray-700">Webseite</label>
                   <input
                     type="url"
                     name="website"
@@ -304,7 +304,7 @@ export default function EditProfile() {
             onClick={() => navigate(-1)}
             className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Cancel
+            Abbrechen
           </button>
           <button
             type="submit"
@@ -313,7 +313,7 @@ export default function EditProfile() {
               saving ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            {saving ? 'Saving...' : 'Save Profile'}
+            {saving ? 'Wird gespeichert...' : 'Profil speichern'}
           </button>
         </div>
       </form>

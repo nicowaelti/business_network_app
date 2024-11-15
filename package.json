@@ -7,10 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "create-test-user": "node create-test-user.js"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.0",
+    "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.1.5",
     "firebase": "^11.0.1",
     "react": "^18.3.1",

@@ -22,8 +22,8 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     currentUser,
-    isAdmin: currentUser?.email === 'admin@example.com', // Simple admin check - should be enhanced
-    isCompany: currentUser?.email?.endsWith('@company.com'), // Simple company check - should be enhanced
+    isAdmin: currentUser?.email === 'admin@example.com',
+    isCompany: currentUser?.email?.endsWith('@company.com'),
   };
 
   return (

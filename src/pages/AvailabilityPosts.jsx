@@ -34,7 +34,7 @@ export default function AvailabilityPosts() {
       setAvailabilityPosts(availabilityList);
     } catch (error) {
       console.error('Error fetching availability posts:', error);
-      alert('Failed to load availability posts');
+      alert('Verfügbarkeitsbeiträge konnten nicht geladen werden');
     } finally {
       setLoading(false);
     }
@@ -55,19 +55,19 @@ export default function AvailabilityPosts() {
 
   const handleDelete = async (postId, createdBy) => {
     if (createdBy !== currentUser.uid) {
-      alert('You can only delete your own posts.');
+      alert('Sie können nur Ihre eigenen Beiträge löschen.');
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this availability post?')) {
+    if (window.confirm('Sind Sie sicher, dass Sie diesen Verfügbarkeitsbeitrag löschen möchten?')) {
       try {
         setLoading(true);
         await deleteDoc(doc(db, 'availabilityPosts', postId));
         await fetchAvailabilityPosts();
-        alert('Post deleted successfully!');
+        alert('Beitrag erfolgreich gelöscht!');
       } catch (error) {
         console.error('Error deleting post:', error);
-        alert('Failed to delete post. Please try again.');
+        alert('Beitrag konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.');
       } finally {
         setLoading(false);
       }
@@ -86,7 +86,7 @@ export default function AvailabilityPosts() {
           ...formData,
           updatedAt: serverTimestamp(),
         });
-        alert('Post updated successfully!');
+        alert('Beitrag erfolgreich aktualisiert!');
       } else {
         // Create new post
         const availabilityRef = collection(db, 'availabilityPosts');
@@ -95,7 +95,7 @@ export default function AvailabilityPosts() {
           createdBy: currentUser.uid,
           createdAt: serverTimestamp(),
         });
-        alert('Post created successfully!');
+        alert('Beitrag erfolgreich erstellt!');
       }
 
       setFormData({
@@ -109,8 +109,8 @@ export default function AvailabilityPosts() {
       setEditingPost(null);
       await fetchAvailabilityPosts();
     } catch (error) {
-      console.error('Error saving post:', error);
-      alert('Failed to save post. Please try again.');
+      console.error('Fehler beim Speichern des Beitrags:', error);
+      alert('Beitrag konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.');
     } finally {
       setLoading(false);
     }
@@ -139,13 +139,13 @@ export default function AvailabilityPosts() {
   return (
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Availability Posts</h1>
+        <h1 className="text-2xl font-bold">Verfügbare Kapazitäten</h1>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
           >
-            Create Post
+            Beitrag erstellen
           </button>
         )}
       </div>
@@ -153,11 +153,11 @@ export default function AvailabilityPosts() {
       {showForm && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            {editingPost ? 'Edit Availability Post' : 'Create New Availability Post'}
+            {editingPost ? 'Beitrag zur Verfügbarkeit bearbeiten' : 'Neuen Beitrag zur Verfügbarkeit erstellen'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <label className="block text-sm font-medium text-gray-700">Beschreibung</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -167,7 +167,7 @@ export default function AvailabilityPosts() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Available From</label>
+              <label className="block text-sm font-medium text-gray-700">Verfügbar von</label>
               <input
                 type="date"
                 value={formData.availableFrom}
@@ -177,7 +177,7 @@ export default function AvailabilityPosts() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Available Until</label>
+              <label className="block text-sm font-medium text-gray-700">Verfügbar bis</label>
               <input
                 type="date"
                 value={formData.availableUntil}
@@ -187,7 +187,7 @@ export default function AvailabilityPosts() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Location</label>
+              <label className="block text-sm font-medium text-gray-700">Standort</label>
               <input
                 type="text"
                 value={formData.location}
@@ -197,7 +197,7 @@ export default function AvailabilityPosts() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Contact Information</label>
+              <label className="block text-sm font-medium text-gray-700">Kontaktinformationen</label>
               <input
                 type="text"
                 value={formData.contactInfo}
@@ -212,14 +212,14 @@ export default function AvailabilityPosts() {
                 disabled={loading}
                 className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
               >
-                {loading ? 'Saving...' : (editingPost ? 'Update Post' : 'Create Post')}
+                {loading ? 'Wird gespeichert...' : (editingPost ? 'Beitrag aktualisieren' : 'Beitrag erstellen')}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
                 className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Cancel
+                Abbrechen
               </button>
             </div>
           </form>
@@ -233,25 +233,25 @@ export default function AvailabilityPosts() {
               <div>
                 <h3 className="text-lg font-semibold mb-2">{post.description}</h3>
                 <p className="text-sm text-gray-600 mb-2">
-                  Available from {post.availableFrom ? new Date(post.availableFrom).toLocaleDateString() : 'N/A'} 
-                  to {post.availableUntil ? new Date(post.availableUntil).toLocaleDateString() : 'N/A'}
+                  Verfügbar von {post.availableFrom ? new Date(post.availableFrom).toLocaleDateString() : 'N/A'} 
+                  bis {post.availableUntil ? new Date(post.availableUntil).toLocaleDateString() : 'N/A'}
                 </p>
-                <p className="text-sm text-gray-600 mb-2">Location: {post.location || 'N/A'}</p>
-                <p className="text-sm text-gray-600">Contact: {post.contactInfo || 'N/A'}</p>
+                <p className="text-sm text-gray-600 mb-2">Standort: {post.location || 'N/A'}</p>
+                <p className="text-sm text-gray-600">Kontakt: {post.contactInfo || 'N/A'}</p>
               </div>
               {post.createdBy === currentUser.uid && (
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEdit(post)}
                     className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50"
-                    title="Edit post"
+                    title="Beitrag bearbeiten"
                   >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(post.id, post.createdBy)}
                     className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                    title="Delete post"
+                    title="Beitrag löschen"
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -260,13 +260,13 @@ export default function AvailabilityPosts() {
             </div>
             <div className="mt-4 flex items-center justify-between">
               <Link to={`/profile/${post.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
-                View Creator's Profile
+                Profil des Erstellers anzeigen
               </Link>
               <Link 
                 to={`/availability-posts/${post.id}`}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                View Details →
+                Details anzeigen →
               </Link>
             </div>
           </div>
@@ -274,7 +274,7 @@ export default function AvailabilityPosts() {
 
         {availabilityPosts.length === 0 && !showForm && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No availability posts yet. Be the first to post your availability!</p>
+            <p className="text-gray-500">Es sind noch keine Verfügbarkeitsbeiträge vorhanden. Seien Sie der Erste, der seine Verfügbarkeit postet!</p>
           </div>
         )}
       </div>

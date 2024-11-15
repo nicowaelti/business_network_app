@@ -39,7 +39,7 @@ export default function Jobs() {
       setJobs(jobsList);
     } catch (error) {
       console.error('Error fetching jobs:', error);
-      alert('Failed to load jobs');
+      alert('Jobs konnten nicht geladen werden');
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export default function Jobs() {
           ...formData,
           updatedAt: serverTimestamp(),
         });
-        alert('Job updated successfully!');
+        alert('Job erfolgreich aktualisiert!');
       } else {
         // Create new job
         const jobsRef = collection(db, 'jobs');
@@ -94,7 +94,7 @@ export default function Jobs() {
           companyName: userProfile?.profileType === 'company' ? userProfile.companyName : userProfile.name,
           createdAt: serverTimestamp(),
         });
-        alert('Job posted successfully!');
+        alert('Job erfolgreich erstellt!');
       }
 
       setFormData({
@@ -111,8 +111,8 @@ export default function Jobs() {
       setEditingJob(null);
       await fetchData();
     } catch (error) {
-      console.error('Error saving job:', error);
-      alert('Failed to save job. Please try again.');
+      console.error('Fehler beim Speichern des Jobs:', error);
+      alert('Job konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.');
     } finally {
       setLoading(false);
     }
@@ -121,19 +121,19 @@ export default function Jobs() {
   const handleDelete = async (jobId, createdBy) => {
     // Only allow deletion if the current user is the creator
     if (createdBy !== currentUser.uid) {
-      alert('You can only delete your own job posts.');
+      alert('Sie können nur Ihre eigenen Jobangebote löschen.');
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this job post?')) {
+    if (window.confirm('Sind Sie sicher, dass Sie dieses Jobangebot löschen möchten?')) {
       try {
         setLoading(true);
         await deleteDoc(doc(db, 'jobs', jobId));
         await fetchData(); // Refresh the jobs list
-        alert('Job post deleted successfully!');
+        alert('Jobangebot erfolgreich gelöscht!');
       } catch (error) {
         console.error('Error deleting job:', error);
-        alert('Failed to delete job post. Please try again.');
+        alert('Jobangebot konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.');
       } finally {
         setLoading(false);
       }
@@ -172,7 +172,7 @@ export default function Jobs() {
             onClick={() => setShowForm(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
           >
-            Post Job
+            Job erstellen
           </button>
         )}
       </div>
@@ -180,11 +180,11 @@ export default function Jobs() {
       {showForm && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            {editingJob ? 'Edit Job Post' : 'Create New Job Post'}
+            {editingJob ? 'Job bearbeiten' : 'Neuen Job erstellen'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Job Title</label>
+              <label className="block text-sm font-medium text-gray-700">Stellentitel</label>
               <input
                 type="text"
                 required
@@ -195,23 +195,23 @@ export default function Jobs() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Job Type</label>
+              <label className="block text-sm font-medium text-gray-700">Beschäftigungsart</label>
               <select
                 required
                 value={formData.type}
                 onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               >
-                <option value="">Select type</option>
-                <option value="Full-time">Full-time</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Contract">Contract</option>
-                <option value="Freelance">Freelance</option>
+                <option value="">Art auswählen</option>
+                <option value="Full-time">Vollzeit</option>
+                <option value="Part-time">Teilzeit</option>
+                <option value="Contract">Befristet</option>
+                <option value="Freelance">Freiberuflich</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Location</label>
+              <label className="block text-sm font-medium text-gray-700">Standort</label>
               <input
                 type="text"
                 required
@@ -222,21 +222,21 @@ export default function Jobs() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Remote Type</label>
+              <label className="block text-sm font-medium text-gray-700">Remote-Art</label>
               <select
                 value={formData.remoteType}
                 onChange={(e) => setFormData(prev => ({ ...prev, remoteType: e.target.value }))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               >
-                <option value="no_preference">No Preference</option>
-                <option value="remote_only">Remote Only</option>
+                <option value="no_preference">Keine Präferenz</option>
+                <option value="remote_only">Nur Remote</option>
                 <option value="hybrid">Hybrid</option>
-                <option value="on_site">On-Site</option>
+                <option value="on_site">Vor Ort</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <label className="block text-sm font-medium text-gray-700">Beschreibung</label>
               <textarea
                 required
                 value={formData.description}
@@ -247,39 +247,39 @@ export default function Jobs() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Requirements</label>
+              <label className="block text-sm font-medium text-gray-700">Anforderungen</label>
               <textarea
                 required
                 value={formData.requirements}
                 onChange={(e) => setFormData(prev => ({ ...prev, requirements: e.target.value }))}
                 rows={4}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="List the key requirements for this position..."
+                placeholder="Listen Sie die wichtigsten Anforderungen für diese Position auf..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Salary Range</label>
+              <label className="block text-sm font-medium text-gray-700">Gehaltsrahmen</label>
               <input
                 type="text"
                 value={formData.salary}
                 onChange={(e) => setFormData(prev => ({ ...prev, salary: e.target.value }))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="e.g., CHF 80,000 - 100,000 per year"
+                placeholder="z.B. CHF 80.000 - 100.000 pro Jahr"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Contact Information</label>
+              <label className="block text-sm font-medium text-gray-700">Kontaktinformationen</label>
               <input
                 type="text"
                 value={formData.contactInfo}
                 onChange={(e) => setFormData(prev => ({ ...prev, contactInfo: e.target.value }))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="Email or phone number for applications"
+                placeholder="E-Mail oder Telefonnummer für Bewerbungen"
               />
               <p className="mt-1 text-sm text-gray-500">
-                How should candidates contact you about this position?
+                Wie sollen Kandidaten Sie bezüglich dieser Position kontaktieren?
               </p>
             </div>
 
@@ -290,14 +290,14 @@ export default function Jobs() {
                 onClick={handleSubmit}
                 className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
               >
-                {loading ? 'Saving...' : (editingJob ? 'Update Job' : 'Post Job')}
+                {loading ? 'Wird gespeichert...' : (editingJob ? 'Job aktualisieren' : 'Job veröffentlichen')}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
                 className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Cancel
+                Abbrechen
               </button>
             </div>
           </form>
@@ -322,55 +322,39 @@ export default function Jobs() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-4">
                 {job.salary && (
                   <span className="text-sm text-gray-600">{job.salary}</span>
                 )}
                 {job.createdBy === currentUser.uid && (
-                  <>
+                  <div className="flex space-x-2">
                     <button
                       onClick={() => handleEdit(job)}
                       className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50"
-                      title="Edit job post"
+                      title="Job bearbeiten"
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(job.id, job.createdBy)}
                       className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                      title="Delete job post"
+                      title="Job löschen"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
-            
-            <div className="prose prose-sm max-w-none mt-4">
-              <h4 className="text-sm font-medium text-gray-900">Description</h4>
-              <p className="mt-2 text-sm text-gray-600">{job.description}</p>
-              
-              <h4 className="text-sm font-medium text-gray-900 mt-4">Requirements</h4>
-              <p className="mt-2 text-sm text-gray-600">{job.requirements}</p>
-
-              {job.contactInfo && (
-                <>
-                  <h4 className="text-sm font-medium text-gray-900 mt-4">Contact</h4>
-                  <p className="mt-2 text-sm text-gray-600">{job.contactInfo}</p>
-                </>
-              )}
-            </div>
-
             <div className="mt-4 flex items-center justify-between">
               <Link to={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
-                View Creator's Profile
+                Profil des Erstellers anzeigen
               </Link>
               <Link 
                 to={`/jobs/${job.id}`}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                View Details →
+                Details anzeigen →
               </Link>
             </div>
           </div>
@@ -378,7 +362,7 @@ export default function Jobs() {
 
         {jobs.length === 0 && !showForm && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No jobs posted yet. Be the first to post a job!</p>
+            <p className="text-gray-500">Es sind noch keine Jobs vorhanden. Seien Sie der Erste, der einen Job postet!</p>
           </div>
         )}
       </div>

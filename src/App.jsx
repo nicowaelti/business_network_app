@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import Jobs from './pages/Jobs';
 import Companies from './pages/Companies';
 import Profile from './pages/Profile';
@@ -40,7 +41,7 @@ const Dashboard = () => {
         const eventsRef = collection(db, 'events');
         const eventsQuery = query(
           eventsRef,
-          where('date', '>=', new Date().toISOString().split('T')[0]), // Only future events
+          where('date', '>=', new Date().toISOString().split('T')[0]),
           orderBy('date', 'asc')
         );
         const eventsSnapshot = await getDocs(eventsQuery);
@@ -192,6 +193,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           {/* Protected Routes */}
           <Route
@@ -211,10 +213,27 @@ function App() {
             }
           />
           <Route
+            path="/jobs/:jobId"
+            element={
+              <ProtectedRoute>
+                <JobDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/companies"
             element={
               <ProtectedRoute>
                 <Companies />
+              </ProtectedRoute>
+            }
+          />
+          {/* Profile routes - specific before dynamic */}
+          <Route
+            path="/profile/edit"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             }
           />
@@ -227,14 +246,6 @@ function App() {
             }
           />
           <Route
-            path="/profile/edit"
-            element={
-              <ProtectedRoute>
-                <EditProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/availability-posts"
             element={
               <ProtectedRoute>
@@ -243,26 +254,18 @@ function App() {
             }
           />
           <Route
-            path="/events"
-            element={
-              <ProtectedRoute>
-                <Events />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/jobs/:jobId"
-            element={
-              <ProtectedRoute>
-                <JobDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/availability-posts/:postId"
             element={
               <ProtectedRoute>
                 <AvailabilityPostDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <Events />
               </ProtectedRoute>
             }
           />

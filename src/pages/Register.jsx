@@ -25,11 +25,11 @@ export default function Register() {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      return setError('Passwords do not match');
+      return setError('Passwörter stimmen nicht überein');
     }
 
     if (formData.password.length < 6) {
-      return setError('Password must be at least 6 characters long');
+      return setError('Passwort muss mindestens 6 Zeichen lang sein');
     }
 
     setError('');
@@ -41,9 +41,9 @@ export default function Register() {
       navigate('/profile/edit');
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
-        setError('This email is already in use. Please use a different email.');
+        setError('Diese E-Mail wird bereits verwendet. Bitte verwenden Sie eine andere E-Mail.');
       } else {
-        setError('Failed to create an account. ' + err.message);
+        setError('Konto konnte nicht erstellt werden. ' + err.message);
       }
       console.error(err);
     } finally {
@@ -55,10 +55,10 @@ export default function Register() {
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
+          Konto erstellen
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Join our professional network
+          Treten Sie unserem professionellen Netzwerk bei
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export default function Register() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="userType" className="block text-sm font-medium text-gray-700">
-                I am a
+                Ich bin ein
               </label>
               <select
                 id="userType"
@@ -82,14 +82,14 @@ export default function Register() {
                 value={formData.userType}
                 onChange={handleChange}
               >
-                <option value="freelancer">Freelancer</option>
-                <option value="company">Company</option>
+                <option value="freelancer">Freiberufler</option>
+                <option value="company">Unternehmen</option>
               </select>
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                E-Mail-Adresse
               </label>
               <input
                 id="email"
@@ -105,7 +105,7 @@ export default function Register() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Passwort
               </label>
               <input
                 id="password"
@@ -121,7 +121,7 @@ export default function Register() {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
+                Passwort bestätigen
               </label>
               <input
                 id="confirmPassword"
@@ -143,7 +143,7 @@ export default function Register() {
                   loading ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                {loading ? 'Creating account...' : 'Create account'}
+                {loading ? 'Konto wird erstellt...' : 'Konto erstellen'}
               </button>
             </div>
           </form>
@@ -155,7 +155,7 @@ export default function Register() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  Already have an account?
+                  Haben Sie bereits ein Konto?
                 </span>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function Register() {
                 onClick={() => navigate('/login')}
                 className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
-                Sign in instead
+                Stattdessen anmelden
               </button>
             </div>
           </div>

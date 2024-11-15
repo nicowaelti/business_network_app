@@ -35,7 +35,7 @@ export default function Events() {
       setEvents(eventsList);
     } catch (error) {
       console.error('Error fetching events:', error);
-      alert('Failed to load events');
+      alert('Events konnten nicht geladen werden');
     } finally {
       setLoading(false);
     }
@@ -57,19 +57,19 @@ export default function Events() {
 
   const handleDelete = async (eventId, createdBy) => {
     if (createdBy !== currentUser.uid) {
-      alert('You can only delete your own events.');
+      alert('Sie können nur Ihre eigenen Events löschen.');
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this event?')) {
+    if (window.confirm('Sind Sie sicher, dass Sie dieses Event löschen möchten?')) {
       try {
         setLoading(true);
         await deleteDoc(doc(db, 'events', eventId));
         await fetchEvents();
-        alert('Event deleted successfully!');
+        alert('Event erfolgreich gelöscht!');
       } catch (error) {
         console.error('Error deleting event:', error);
-        alert('Failed to delete event. Please try again.');
+        alert('Event konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.');
       } finally {
         setLoading(false);
       }
@@ -88,7 +88,7 @@ export default function Events() {
           ...formData,
           updatedAt: serverTimestamp(),
         });
-        alert('Event updated successfully!');
+        alert('Event erfolgreich aktualisiert!');
       } else {
         // Create new event
         const eventsRef = collection(db, 'events');
@@ -97,7 +97,7 @@ export default function Events() {
           createdBy: currentUser.uid,
           createdAt: serverTimestamp(),
         });
-        alert('Event created successfully!');
+        alert('Event erfolgreich erstellt!');
       }
 
       setFormData({
@@ -112,8 +112,8 @@ export default function Events() {
       setEditingEvent(null);
       await fetchEvents();
     } catch (error) {
-      console.error('Error saving event:', error);
-      alert('Failed to save event. Please try again.');
+      console.error('Fehler beim Speichern des Events:', error);
+      alert('Event konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.');
     } finally {
       setLoading(false);
     }
@@ -149,7 +149,7 @@ export default function Events() {
             onClick={() => setShowForm(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
           >
-            Create Event
+            Event erstellen
           </button>
         )}
       </div>
@@ -157,11 +157,11 @@ export default function Events() {
       {showForm && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            {editingEvent ? 'Edit Event' : 'Create New Event'}
+            {editingEvent ? 'Event bearbeiten' : 'Neues Event erstellen'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Event Title</label>
+              <label className="block text-sm font-medium text-gray-700">Veranstaltungstitel</label>
               <input
                 type="text"
                 value={formData.title}
@@ -171,7 +171,7 @@ export default function Events() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Date</label>
+              <label className="block text-sm font-medium text-gray-700">Datum</label>
               <input
                 type="date"
                 value={formData.date}
@@ -181,7 +181,7 @@ export default function Events() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Time</label>
+              <label className="block text-sm font-medium text-gray-700">Uhrzeit</label>
               <input
                 type="time"
                 value={formData.time}
@@ -191,7 +191,7 @@ export default function Events() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Location</label>
+              <label className="block text-sm font-medium text-gray-700">Ort</label>
               <input
                 type="text"
                 value={formData.location}
@@ -201,7 +201,7 @@ export default function Events() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
+              <label className="block text-sm font-medium text-gray-700">Beschreibung</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -211,7 +211,7 @@ export default function Events() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Contact Information</label>
+              <label className="block text-sm font-medium text-gray-700">Kontaktinformationen</label>
               <input
                 type="text"
                 value={formData.contactInfo}
@@ -226,14 +226,14 @@ export default function Events() {
                 disabled={loading}
                 className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
               >
-                {loading ? 'Saving...' : (editingEvent ? 'Update Event' : 'Create Event')}
+                {loading ? 'Wird gespeichert...' : (editingEvent ? 'Event aktualisieren' : 'Event erstellen')}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
                 className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Cancel
+                Abbrechen
               </button>
             </div>
           </form>
@@ -248,11 +248,11 @@ export default function Events() {
                 <h3 className="text-lg font-semibold mb-2">{event.title}</h3>
                 <p className="text-sm text-gray-600 mb-2">
                   {new Date(event.date).toLocaleDateString()} 
-                  {event.time && ` at ${event.time}`} • {event.location}
+                  {event.time && ` um ${event.time}`} • {event.location}
                 </p>
                 <p className="text-sm text-gray-600 mb-2">{event.description}</p>
                 {event.contactInfo && (
-                  <p className="text-sm text-gray-600">Contact: {event.contactInfo}</p>
+                  <p className="text-sm text-gray-600">Kontakt: {event.contactInfo}</p>
                 )}
               </div>
               {event.createdBy === currentUser.uid && (
@@ -260,14 +260,14 @@ export default function Events() {
                   <button
                     onClick={() => handleEdit(event)}
                     className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50"
-                    title="Edit event"
+                    title="Event bearbeiten"
                   >
                     <PencilIcon className="h-5 w-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(event.id, event.createdBy)}
                     className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                    title="Delete event"
+                    title="Event löschen"
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -276,7 +276,7 @@ export default function Events() {
             </div>
             <div className="mt-4">
               <Link to={`/profile/${event.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
-                View Creator's Profile
+                Profil des Erstellers anzeigen
               </Link>
             </div>
           </div>
@@ -284,10 +284,10 @@ export default function Events() {
 
         {events.length === 0 && !showForm && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No events yet. Be the first to create an event!</p>
+            <p className="text-gray-500">Es sind noch keine Events vorhanden. Seien Sie der Erste, der ein Event erstellt!</p>
           </div>
         )}
       </div>
     </div>
   );
-} 
+}
