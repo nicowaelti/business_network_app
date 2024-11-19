@@ -166,13 +166,13 @@ export default function Jobs() {
   return (
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Jobs</h1>
+        <h1 className="text-2xl font-bold">Stellenangebote</h1>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
           >
-            Job erstellen
+            Stelle ausschreiben
           </button>
         )}
       </div>
@@ -180,7 +180,7 @@ export default function Jobs() {
       {showForm && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            {editingJob ? 'Job bearbeiten' : 'Neuen Job erstellen'}
+            {editingJob ? 'Stellenangebot bearbeiten' : 'Neues Stellenangebot erstellen'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -203,10 +203,10 @@ export default function Jobs() {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               >
                 <option value="">Art auswählen</option>
-                <option value="Full-time">Vollzeit</option>
-                <option value="Part-time">Teilzeit</option>
-                <option value="Contract">Befristet</option>
-                <option value="Freelance">Freiberuflich</option>
+                <option value="Vollzeit">Vollzeit</option>
+                <option value="Teilzeit">Teilzeit</option>
+                <option value="Befristet">Befristet</option>
+                <option value="Freiberuflich">Freiberuflich</option>
               </select>
             </div>
 
@@ -222,7 +222,7 @@ export default function Jobs() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Remote-Art</label>
+              <label className="block text-sm font-medium text-gray-700">Arbeitsort</label>
               <select
                 value={formData.remoteType}
                 onChange={(e) => setFormData(prev => ({ ...prev, remoteType: e.target.value }))}
@@ -290,7 +290,7 @@ export default function Jobs() {
                 onClick={handleSubmit}
                 className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
               >
-                {loading ? 'Wird gespeichert...' : (editingJob ? 'Job aktualisieren' : 'Job veröffentlichen')}
+                {loading ? 'Wird gespeichert...' : (editingJob ? 'Stelle aktualisieren' : 'Stelle veröffentlichen')}
               </button>
               <button
                 type="button"
@@ -318,7 +318,9 @@ export default function Jobs() {
                     {job.type}
                   </span>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    {job.remoteType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    {job.remoteType === 'no_preference' ? 'Keine Präferenz' :
+                     job.remoteType === 'remote_only' ? 'Nur Remote' :
+                     job.remoteType === 'hybrid' ? 'Hybrid' : 'Vor Ort'}
                   </span>
                 </div>
               </div>
@@ -331,14 +333,14 @@ export default function Jobs() {
                     <button
                       onClick={() => handleEdit(job)}
                       className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50"
-                      title="Job bearbeiten"
+                      title="Stelle bearbeiten"
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(job.id, job.createdBy)}
                       className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                      title="Job löschen"
+                      title="Stelle löschen"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -362,7 +364,7 @@ export default function Jobs() {
 
         {jobs.length === 0 && !showForm && (
           <div className="text-center py-12">
-            <p className="text-gray-500">Es sind noch keine Jobs vorhanden. Seien Sie der Erste, der einen Job postet!</p>
+            <p className="text-gray-500">Es sind noch keine Stellenangebote vorhanden. Seien Sie der Erste, der eine Stelle ausschreibt!</p>
           </div>
         )}
       </div>

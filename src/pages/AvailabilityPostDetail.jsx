@@ -37,7 +37,7 @@ export default function AvailabilityPostDetail() {
     return (
       <div className="max-w-7xl mx-auto p-4">
         <div className="text-center py-12">
-          <p className="text-gray-500">Availability post not found.</p>
+          <p className="text-gray-500">Verfügbarkeitsbeitrag nicht gefunden.</p>
         </div>
       </div>
     );
@@ -47,37 +47,37 @@ export default function AvailabilityPostDetail() {
     <div className="max-w-4xl mx-auto p-4">
       <div className="bg-white shadow rounded-lg p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Availability Post</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Verfügbarkeitsbeitrag</h1>
           <div className="flex items-center space-x-4 text-gray-600">
-            <span>Posted on {new Date(post.createdAt?.seconds * 1000).toLocaleDateString()}</span>
+            <span>Erstellt am {new Date(post.createdAt?.seconds * 1000).toLocaleDateString()}</span>
           </div>
         </div>
 
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-2">Description</h2>
+            <h2 className="text-xl font-semibold mb-2">Beschreibung</h2>
             <p className="text-gray-600 whitespace-pre-line">{post.description}</p>
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold mb-2">Availability Period</h2>
+            <h2 className="text-xl font-semibold mb-2">Verfügbarkeitszeitraum</h2>
             <p className="text-gray-600">
-              From: {post.availableFrom ? new Date(post.availableFrom).toLocaleDateString() : 'N/A'}
+              Von: {post.availableFrom ? new Date(post.availableFrom).toLocaleDateString() : 'N/A'}
               <br />
-              To: {post.availableUntil ? new Date(post.availableUntil).toLocaleDateString() : 'N/A'}
+              Bis: {post.availableUntil ? new Date(post.availableUntil).toLocaleDateString() : 'N/A'}
             </p>
           </div>
 
           {post.location && (
             <div>
-              <h2 className="text-xl font-semibold mb-2">Location</h2>
+              <h2 className="text-xl font-semibold mb-2">Standort</h2>
               <p className="text-gray-600">{post.location}</p>
             </div>
           )}
 
           {post.contactInfo && (
             <div>
-              <h2 className="text-xl font-semibold mb-2">Contact Information</h2>
+              <h2 className="text-xl font-semibold mb-2">Kontaktinformationen</h2>
               <p className="text-gray-600">{post.contactInfo}</p>
             </div>
           )}
@@ -87,11 +87,11 @@ export default function AvailabilityPostDetail() {
               to={`/profile/${post.createdBy}`}
               className="text-indigo-600 hover:text-indigo-800"
             >
-              View Creator's Profile
+              Profil des Erstellers anzeigen
             </Link>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

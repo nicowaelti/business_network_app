@@ -4,9 +4,22 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  deleteUser
 } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, enableIndexedDbPersistence } from 'firebase/firestore';
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  getDocs,
+  deleteDoc,
+  collection,
+  query,
+  where,
+  enableIndexedDbPersistence 
+} from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -74,6 +87,7 @@ export const registerUser = async (email, password, userType) => {
       email,
       createdAt: new Date().toISOString(),
       profileType: userType === 'company' ? 'company' : 'freelancer',
+      role: 'user',
       ...(userType === 'company' ? {
         companyName: '',
         industry: '',
@@ -136,6 +150,53 @@ export const updateUserProfile = async (userId, profileData) => {
     return true;
   } catch (error) {
     console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
+
+// Admin functions
+export const getAllUsers = async () => {
+  try {
+    const usersSnapshot = await getDocs(collection(db, 'users'));
+    return usersSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+};
+
+export const updateUserRole = async (userId, newRole) => {
+  try {
+    await setDoc(doc(db, 'users', userId), {
+      role: newRole,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    return true;
+  } catch (error) {
+    console.error('Error updating user role:', error);
+    throw error;
+  }
+};
+
+export const deleteUserData = async (userId) => {
+  try {
+    await deleteDoc(doc(db, 'users', userId));
+    return true;
+  } catch (error) {
+    console.error('Error deleting user data:', error);
+    throw error;
+  }
+};
+
+export const resetUserPassword = async (email) => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    return true;
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
     throw error;
   }
 };

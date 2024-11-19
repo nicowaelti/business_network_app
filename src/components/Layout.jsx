@@ -8,7 +8,9 @@ import {
   UserIcon,
   XMarkIcon,
   Bars3Icon,
-  CalendarIcon
+  CalendarIcon,
+  Cog6ToothIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../contexts/AuthContext';
 import { logoutUser } from '../config/firebase';
@@ -16,16 +18,16 @@ import networkLogo from '../assets/network_logo.png';
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Only include navigation items that should always be visible or are conditional based on auth
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Jobs', href: '/jobs', icon: BriefcaseIcon },
-    { name: 'Verfügbare Kapazitäten', href: '/availability-posts', icon: CalendarIcon },
-    { name: 'Events', href: '/events', icon: CalendarIcon },
-    { name: 'Members', href: '/companies', icon: UserGroupIcon },
+    { name: 'Übersicht', href: '/dashboard', icon: HomeIcon },
+    { name: 'Stellenangebote', href: '/jobs', icon: BriefcaseIcon },
+    { name: 'Verfügbare Kapazitäten', href: '/availability-posts', icon: ClockIcon },
+    { name: 'Veranstaltungen', href: '/events', icon: CalendarIcon },
+    { name: 'Mitglieder', href: '/companies', icon: UserGroupIcon },
   ];
 
   // Only include the Profile link if the user is logged in
@@ -33,12 +35,17 @@ export default function Layout({ children }) {
     navigation.push({ name: 'Mein Profil', href: `/profile/${currentUser.uid}`, icon: UserIcon });
   }
 
+  // Add admin link if user is admin
+  if (isAdmin) {
+    navigation.push({ name: 'Administration', href: '/admin', icon: Cog6ToothIcon });
+  }
+
   const handleLogout = async () => {
     try {
       await logoutUser();
       navigate('/login');
     } catch (error) {
-      console.error('Failed to log out:', error);
+      console.error('Abmeldung fehlgeschlagen:', error);
     }
   };
 
@@ -82,7 +89,7 @@ export default function Layout({ children }) {
                     className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <span className="sr-only">Close sidebar</span>
+                    <span className="sr-only">Seitenleiste schließen</span>
                     <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
                   </button>
                 </div>
@@ -92,7 +99,7 @@ export default function Layout({ children }) {
                   <img
                     className="h-10 w-auto"
                     src={networkLogo}
-                    alt="Business Network"
+                    alt="Bärner Netzwärcher"
                   />
                   <h1 className="text-xl font-semibold text-gray-900">Bärner Netzwärcher</h1>
                 </div>
@@ -117,7 +124,7 @@ export default function Layout({ children }) {
                   <div>
                     <img
                       className="inline-block h-10 w-10 rounded-full"
-                      src={`https://ui-avatars.com/api/?name=${currentUser?.email || 'User'}`}
+                      src={`https://ui-avatars.com/api/?name=${currentUser?.email || 'Benutzer'}`}
                       alt=""
                     />
                   </div>
@@ -129,7 +136,7 @@ export default function Layout({ children }) {
                       onClick={handleLogout}
                       className="text-sm font-medium text-gray-500 hover:text-gray-700"
                     >
-                      Logout
+                      Abmelden
                     </button>
                   </div>
                 </div>
@@ -148,7 +155,7 @@ export default function Layout({ children }) {
               <img
                 className="h-10 w-auto"
                 src={networkLogo}
-                alt="Business Network"
+                alt="Bärner Netzwärcher"
               />
               <h1 className="text-xl font-semibold text-gray-900">Bärner Netzwärcher</h1>
             </div>
@@ -173,7 +180,7 @@ export default function Layout({ children }) {
               <div>
                 <img
                   className="inline-block h-9 w-9 rounded-full"
-                  src={`https://ui-avatars.com/api/?name=${currentUser?.email || 'User'}`}
+                  src={`https://ui-avatars.com/api/?name=${currentUser?.email || 'Benutzer'}`}
                   alt=""
                 />
               </div>
@@ -185,7 +192,7 @@ export default function Layout({ children }) {
                   onClick={handleLogout}
                   className="text-xs font-medium text-gray-500 hover:text-gray-700"
                 >
-                  Logout
+                  Abmelden
                 </button>
               </div>
             </div>
@@ -201,7 +208,7 @@ export default function Layout({ children }) {
             className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
             onClick={() => setSidebarOpen(true)}
           >
-            <span className="sr-only">Open sidebar</span>
+            <span className="sr-only">Seitenleiste öffnen</span>
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>

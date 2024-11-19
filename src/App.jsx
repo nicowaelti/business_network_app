@@ -12,6 +12,7 @@ import AvailabilityPosts from './pages/AvailabilityPosts';
 import Events from './pages/Events';
 import JobDetail from './pages/JobDetail';
 import AvailabilityPostDetail from './pages/AvailabilityPostDetail';
+import Admin from './pages/Admin';
 import { collection, query, where, orderBy, getDocs, limit } from 'firebase/firestore';
 import { db } from './config/firebase';
 import { useState, useEffect } from 'react';
@@ -22,6 +23,21 @@ const ProtectedRoute = ({ children }) => {
   
   if (!currentUser) {
     return <Navigate to="/login" />;
+  }
+  
+  return <Layout>{children}</Layout>;
+};
+
+// Admin Route Wrapper
+const AdminRoute = ({ children }) => {
+  const { currentUser, isAdmin } = useAuth();
+  
+  if (!currentUser) {
+    return <Navigate to="/login" />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" />;
   }
   
   return <Layout>{children}</Layout>;
@@ -90,10 +106,10 @@ const Dashboard = () => {
 
   return (
     <div className="bg-gray-50 p-6">
-      <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
+      <h2 className="text-2xl font-bold mb-4">Aktuelle Aktivitäten</h2>
 
       <div className="mb-8 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg shadow-sm">
-        <h3 className="text-xl font-semibold mb-2 text-blue-800">Upcoming Events</h3>
+        <h3 className="text-xl font-semibold mb-2 text-blue-800">Kommende Veranstaltungen</h3>
         {futureEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {futureEvents.map(event => (
@@ -103,19 +119,19 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-600">{event.description}</p>
                 <div className="mt-2">
                   <Link to={`/profile/${event.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
-                    View Creator's Profile
+                    Profil des Erstellers anzeigen
                   </Link>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p>No upcoming events.</p>
+          <p>Keine kommenden Veranstaltungen.</p>
         )}
       </div>
       
       <div className="mb-8 p-4 bg-green-50 border-l-4 border-green-400 rounded-lg shadow-sm">
-        <h3 className="text-xl font-semibold mb-2 text-green-800">New Job Posts</h3>
+        <h3 className="text-xl font-semibold mb-2 text-green-800">Neue Stellenangebote</h3>
         {recentJobs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentJobs.map(job => (
@@ -128,57 +144,59 @@ const Dashboard = () => {
                     {job.type}
                   </span>
                   <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-2">
-                    {job.remoteType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    {job.remoteType === 'no_preference' ? 'Keine Präferenz' :
+                     job.remoteType === 'remote_only' ? 'Nur Remote' :
+                     job.remoteType === 'hybrid' ? 'Hybrid' : 'Vor Ort'}
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-gray-600 line-clamp-3">{job.description}</p>
                 <div className="mt-4 flex items-center justify-between">
                   <Link to={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
-                    View Creator's Profile
+                    Profil des Erstellers anzeigen
                   </Link>
                   <Link 
                     to={`/jobs/${job.id}`}
                     className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    View Details →
+                    Details anzeigen →
                   </Link>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p>No new job posts in the last 14 days.</p>
+          <p>Keine neuen Stellenangebote in den letzten 14 Tagen.</p>
         )}
       </div>
 
       <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm">
-        <h3 className="text-xl font-semibold mb-2 text-yellow-800">Recent Availability Posts</h3>
+        <h3 className="text-xl font-semibold mb-2 text-yellow-800">Aktuelle Verfügbarkeiten</h3>
         {recentAvailability.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentAvailability.map(post => (
               <div key={post.id} className="bg-white shadow-md rounded-lg p-4">
                 <h4 className="text-lg font-semibold mb-2">{post.description}</h4>
                 <p className="text-sm text-gray-600">
-                  Available from {post.availableFrom ? new Date(post.availableFrom).toLocaleDateString() : 'N/A'} to {post.availableUntil ? new Date(post.availableUntil).toLocaleDateString() : 'N/A'}
+                  Verfügbar von {post.availableFrom ? new Date(post.availableFrom).toLocaleDateString() : 'N/A'} bis {post.availableUntil ? new Date(post.availableUntil).toLocaleDateString() : 'N/A'}
                 </p>
-                <p className="text-sm text-gray-600">Location: {post.location || 'N/A'}</p>
-                <p className="text-sm text-gray-600">Contact: {post.contactInfo || 'N/A'}</p>
+                <p className="text-sm text-gray-600">Standort: {post.location || 'N/A'}</p>
+                <p className="text-sm text-gray-600">Kontakt: {post.contactInfo || 'N/A'}</p>
                 <div className="mt-4 flex items-center justify-between">
                   <Link to={`/profile/${post.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
-                    View Creator's Profile
+                    Profil des Erstellers anzeigen
                   </Link>
                   <Link 
                     to={`/availability-posts/${post.id}`}
                     className="inline-flex items-center px-3 py-1.5 border border-blue-200 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    View Details →
+                    Details anzeigen →
                   </Link>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p>No recent availability posts.</p>
+          <p>Keine aktuellen Verfügbarkeiten.</p>
         )}
       </div>
     </div>
@@ -195,6 +213,16 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           
+          {/* Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Admin />
+              </AdminRoute>
+            }
+          />
+
           {/* Protected Routes */}
           <Route
             path="/dashboard"

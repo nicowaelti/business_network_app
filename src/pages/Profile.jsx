@@ -15,7 +15,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!userId) {
-        setError('User ID is required');
+        setError('Benutzer-ID ist erforderlich');
         setLoading(false);
         return;
       }
@@ -32,11 +32,11 @@ export default function Profile() {
             navigate('/profile/edit');
             return;
           }
-          setError('Profile not found. Please ensure you have completed your profile setup.');
+          setError('Profil nicht gefunden. Bitte stellen Sie sicher, dass Sie Ihr Profil vollständig eingerichtet haben.');
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        setError('Failed to load profile data');
+        setError('Profildaten konnten nicht geladen werden');
       } finally {
         setLoading(false);
       }
@@ -72,13 +72,13 @@ export default function Profile() {
     return (
       <div className="max-w-2xl mx-auto p-4">
         <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-          <p className="text-yellow-700">No profile data available. Please complete your profile setup.</p>
+          <p className="text-yellow-700">Keine Profildaten verfügbar. Bitte vervollständigen Sie Ihre Profileinrichtung.</p>
           {currentUser && userId === currentUser.uid && (
             <button
               onClick={() => navigate('/profile/edit')}
               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Create Profile
+              Profil erstellen
             </button>
           )}
         </div>
@@ -89,47 +89,47 @@ export default function Profile() {
   const FreelancerProfile = () => (
     <div className="space-y-6">
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+        <h2 className="text-xl font-semibold mb-4">Persönliche Informationen</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600">Full Name</label>
+            <label className="block text-sm font-medium text-gray-600">Vollständiger Name</label>
             <p className="mt-1">{profileData.name}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Title</label>
-            <p className="mt-1">{profileData.title || 'Not specified'}</p>
+            <label className="block text-sm font-medium text-gray-600">Titel</label>
+            <p className="mt-1">{profileData.title || 'Nicht angegeben'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Location</label>
-            <p className="mt-1">{profileData.location || 'Not specified'}</p>
+            <label className="block text-sm font-medium text-gray-600">Standort</label>
+            <p className="mt-1">{profileData.location || 'Nicht angegeben'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Email</label>
+            <label className="block text-sm font-medium text-gray-600">E-Mail</label>
             <p className="mt-1">{profileData.email}</p>
           </div>
         </div>
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Professional Details</h2>
+        <h2 className="text-xl font-semibold mb-4">Berufliche Details</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600">Skills</label>
+            <label className="block text-sm font-medium text-gray-600">Fähigkeiten</label>
             <div className="mt-1 flex flex-wrap gap-2">
               {profileData.skills?.map((skill, index) => (
                 <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
                   {skill}
                 </span>
-              )) || 'No skills listed'}
+              )) || 'Keine Fähigkeiten aufgelistet'}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Experience</label>
-            <p className="mt-1 whitespace-pre-line">{profileData.experience || 'No experience listed'}</p>
+            <label className="block text-sm font-medium text-gray-600">Erfahrung</label>
+            <p className="mt-1 whitespace-pre-line">{profileData.experience || 'Keine Erfahrung aufgelistet'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Education</label>
-            <p className="mt-1">{profileData.education || 'No education listed'}</p>
+            <label className="block text-sm font-medium text-gray-600">Ausbildung</label>
+            <p className="mt-1">{profileData.education || 'Keine Ausbildung aufgelistet'}</p>
           </div>
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function Profile() {
           <h2 className="text-xl font-semibold mb-4">Portfolio</h2>
           <a href={profileData.portfolio} target="_blank" rel="noopener noreferrer" 
              className="text-blue-600 hover:text-blue-800">
-            View Portfolio →
+            Portfolio ansehen →
           </a>
         </div>
       )}
@@ -149,47 +149,47 @@ export default function Profile() {
   const CompanyProfile = () => (
     <div className="space-y-6">
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Company Information</h2>
+        <h2 className="text-xl font-semibold mb-4">Unternehmensinformationen</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600">Company Name</label>
+            <label className="block text-sm font-medium text-gray-600">Firmenname</label>
             <p className="mt-1">{profileData.companyName}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Industry</label>
-            <p className="mt-1">{profileData.industry || 'Not specified'}</p>
+            <label className="block text-sm font-medium text-gray-600">Branche</label>
+            <p className="mt-1">{profileData.industry || 'Nicht angegeben'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Company Size</label>
-            <p className="mt-1">{profileData.companySize || 'Not specified'}</p>
+            <label className="block text-sm font-medium text-gray-600">Unternehmensgröße</label>
+            <p className="mt-1">{profileData.companySize || 'Nicht angegeben'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Year Established</label>
-            <p className="mt-1">{profileData.yearEstablished || 'Not specified'}</p>
+            <label className="block text-sm font-medium text-gray-600">Gründungsjahr</label>
+            <p className="mt-1">{profileData.yearEstablished || 'Nicht angegeben'}</p>
           </div>
         </div>
       </div>
 
       <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Business Details</h2>
+        <h2 className="text-xl font-semibold mb-4">Geschäftsdetails</h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600">Services</label>
-            <p className="mt-1 whitespace-pre-line">{profileData.services || 'No services listed'}</p>
+            <label className="block text-sm font-medium text-gray-600">Dienstleistungen</label>
+            <p className="mt-1 whitespace-pre-line">{profileData.services || 'Keine Dienstleistungen aufgelistet'}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Products</label>
-            <p className="mt-1 whitespace-pre-line">{profileData.products || 'No products listed'}</p>
+            <label className="block text-sm font-medium text-gray-600">Produkte</label>
+            <p className="mt-1 whitespace-pre-line">{profileData.products || 'Keine Produkte aufgelistet'}</p>
           </div>
         </div>
       </div>
 
       {profileData.website && (
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Website</h2>
+          <h2 className="text-xl font-semibold mb-4">Webseite</h2>
           <a href={profileData.website} target="_blank" rel="noopener noreferrer" 
              className="text-blue-600 hover:text-blue-800">
-            Visit Website →
+            Webseite besuchen →
           </a>
         </div>
       )}
@@ -207,12 +207,12 @@ export default function Profile() {
             onClick={() => navigate('/profile/edit')}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Edit Profile
+            Profil bearbeiten
           </button>
         )}
       </div>
       <p className="text-gray-600 mt-2 mb-6">
-        {profileData.profileType === 'company' ? 'Company Profile' : 'Freelancer Profile'}
+        {profileData.profileType === 'company' ? 'Unternehmensprofil' : 'Freiberuflerprofil'}
       </p>
 
       {profileData.profileType === 'freelancer' ? <FreelancerProfile /> : <CompanyProfile />}

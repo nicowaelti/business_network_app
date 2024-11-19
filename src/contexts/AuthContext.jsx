@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     currentUser,
-    isAdmin: currentUser?.email === 'admin@example.com',
+    isAdmin: currentUser?.email === 'nico.waelti@yahoo.de',
     isCompany: currentUser?.email?.endsWith('@company.com'),
   };
 

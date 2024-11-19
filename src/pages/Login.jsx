@@ -122,13 +122,7 @@ export default function Login() {
             {loading ? 'Anmeldung läuft...' : 'Anmelden'}
           </button>
         </form>
-        <div className="mt-6 flex justify-between text-sm">
-          <Link 
-            to="/register" 
-            className="text-indigo-600 hover:text-indigo-800"
-          >
-            Neues Konto erstellen
-          </Link>
+        <div className="mt-6 flex justify-end text-sm">
           <Link 
             to="/forgot-password" 
             className="text-gray-600 hover:text-gray-800"

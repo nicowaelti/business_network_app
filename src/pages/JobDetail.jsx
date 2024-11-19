@@ -37,7 +37,7 @@ export default function JobDetail() {
     return (
       <div className="max-w-7xl mx-auto p-4">
         <div className="text-center py-12">
-          <p className="text-gray-500">Job not found.</p>
+          <p className="text-gray-500">Stelle nicht gefunden.</p>
         </div>
       </div>
     );
@@ -71,18 +71,18 @@ export default function JobDetail() {
 
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-2">Description</h2>
+            <h2 className="text-xl font-semibold mb-2">Beschreibung</h2>
             <p className="text-gray-600 whitespace-pre-line">{job.description}</p>
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold mb-2">Requirements</h2>
+            <h2 className="text-xl font-semibold mb-2">Anforderungen</h2>
             <p className="text-gray-600 whitespace-pre-line">{job.requirements}</p>
           </div>
 
           {job.contactInfo && (
             <div>
-              <h2 className="text-xl font-semibold mb-2">Contact Information</h2>
+              <h2 className="text-xl font-semibold mb-2">Kontaktinformationen</h2>
               <p className="text-gray-600">{job.contactInfo}</p>
             </div>
           )}
@@ -92,11 +92,11 @@ export default function JobDetail() {
               to={`/profile/${job.createdBy}`}
               className="text-indigo-600 hover:text-indigo-800"
             >
-              View Creator's Profile
+              Profil des Erstellers anzeigen
             </Link>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}
