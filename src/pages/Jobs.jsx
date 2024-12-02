@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export default function Jobs() {
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -119,21 +119,21 @@ export default function Jobs() {
   };
 
   const handleDelete = async (jobId, createdBy) => {
-    // Only allow deletion if the current user is the creator
-    if (createdBy !== currentUser.uid) {
-      alert('Sie können nur Ihre eigenen Jobangebote löschen.');
+    // Allow deletion if user is creator or admin
+    if (createdBy !== currentUser.uid && !isAdmin) {
+      alert('Sie können nur Ihre eigenen Projekte löschen.');
       return;
     }
 
-    if (window.confirm('Sind Sie sicher, dass Sie dieses Jobangebot löschen möchten?')) {
+    if (window.confirm('Sind Sie sicher, dass Sie dieses Projekt löschen möchten?')) {
       try {
         setLoading(true);
         await deleteDoc(doc(db, 'jobs', jobId));
-        await fetchData(); // Refresh the jobs list
-        alert('Jobangebot erfolgreich gelöscht!');
+        await fetchData();
+        alert('Projekt erfolgreich gelöscht!');
       } catch (error) {
         console.error('Error deleting job:', error);
-        alert('Jobangebot konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.');
+        alert('Projekt konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.');
       } finally {
         setLoading(false);
       }
@@ -166,13 +166,13 @@ export default function Jobs() {
   return (
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Stellenangebote</h1>
+        <h1 className="text-2xl font-bold">Projekte</h1>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
           >
-            Stelle ausschreiben
+            Projekt ausschreiben
           </button>
         )}
       </div>
@@ -180,11 +180,11 @@ export default function Jobs() {
       {showForm && (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            {editingJob ? 'Stellenangebot bearbeiten' : 'Neues Stellenangebot erstellen'}
+            {editingJob ? 'Projekt bearbeiten' : 'Neues Projekt erstellen'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Stellentitel</label>
+              <label className="block text-sm font-medium text-gray-700">Projekttitel</label>
               <input
                 type="text"
                 required
@@ -290,7 +290,7 @@ export default function Jobs() {
                 onClick={handleSubmit}
                 className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
               >
-                {loading ? 'Wird gespeichert...' : (editingJob ? 'Stelle aktualisieren' : 'Stelle veröffentlichen')}
+                {loading ? 'Wird gespeichert...' : (editingJob ? 'Projekt aktualisieren' : 'Projekt veröffentlichen')}
               </button>
               <button
                 type="button"
@@ -328,19 +328,19 @@ export default function Jobs() {
                 {job.salary && (
                   <span className="text-sm text-gray-600">{job.salary}</span>
                 )}
-                {job.createdBy === currentUser.uid && (
+                {(job.createdBy === currentUser.uid || isAdmin) && (
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleEdit(job)}
                       className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50"
-                      title="Stelle bearbeiten"
+                      title="Projekt bearbeiten"
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(job.id, job.createdBy)}
                       className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                      title="Stelle löschen"
+                      title="Projekt löschen"
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -364,7 +364,7 @@ export default function Jobs() {
 
         {jobs.length === 0 && !showForm && (
           <div className="text-center py-12">
-            <p className="text-gray-500">Es sind noch keine Stellenangebote vorhanden. Seien Sie der Erste, der eine Stelle ausschreibt!</p>
+            <p className="text-gray-500">Es sind noch keine Projekte vorhanden. Seien Sie der Erste, der ein Projekt ausschreibt!</p>
           </div>
         )}
       </div>

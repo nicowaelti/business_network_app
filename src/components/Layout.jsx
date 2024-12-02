@@ -18,13 +18,13 @@ import networkLogo from '../assets/network_logo.png';
 
 export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { currentUser, isAdmin } = useAuth();
+  const { currentUser, isAdmin, isCompany } = useAuth();
   const navigate = useNavigate();
 
   // Only include navigation items that should always be visible or are conditional based on auth
   const navigation = [
     { name: 'Übersicht', href: '/dashboard', icon: HomeIcon },
-    { name: 'Stellenangebote', href: '/jobs', icon: BriefcaseIcon },
+    { name: 'Projekte', href: '/jobs', icon: BriefcaseIcon },
     { name: 'Verfügbare Kapazitäten', href: '/availability-posts', icon: ClockIcon },
     { name: 'Veranstaltungen', href: '/events', icon: CalendarIcon },
     { name: 'Mitglieder', href: '/companies', icon: UserGroupIcon },
@@ -39,6 +39,12 @@ export default function Layout({ children }) {
   if (isAdmin) {
     navigation.push({ name: 'Administration', href: '/admin', icon: Cog6ToothIcon });
   }
+
+  const getUserRole = () => {
+    if (isAdmin) return 'Administrator';
+    if (isCompany) return 'Unternehmen';
+    return 'Mitglied';
+  };
 
   const handleLogout = async () => {
     try {
@@ -129,6 +135,9 @@ export default function Layout({ children }) {
                     />
                   </div>
                   <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-500">
+                      {getUserRole()}
+                    </p>
                     <p className="text-base font-medium text-gray-700 group-hover:text-gray-900">
                       {currentUser?.email}
                     </p>
@@ -185,6 +194,9 @@ export default function Layout({ children }) {
                 />
               </div>
               <div className="ml-3">
+                <p className="text-xs font-medium text-gray-500">
+                  {getUserRole()}
+                </p>
                 <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                   {currentUser?.email}
                 </p>

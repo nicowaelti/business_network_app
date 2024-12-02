@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export default function AvailabilityPosts() {
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
   const [availabilityPosts, setAvailabilityPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -54,7 +54,8 @@ export default function AvailabilityPosts() {
   };
 
   const handleDelete = async (postId, createdBy) => {
-    if (createdBy !== currentUser.uid) {
+    // Allow deletion if user is creator or admin
+    if (createdBy !== currentUser.uid && !isAdmin) {
       alert('Sie können nur Ihre eigenen Beiträge löschen.');
       return;
     }
@@ -239,7 +240,7 @@ export default function AvailabilityPosts() {
                 <p className="text-sm text-gray-600 mb-2">Standort: {post.location || 'N/A'}</p>
                 <p className="text-sm text-gray-600">Kontakt: {post.contactInfo || 'N/A'}</p>
               </div>
-              {post.createdBy === currentUser.uid && (
+              {(post.createdBy === currentUser.uid || isAdmin) && (
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEdit(post)}

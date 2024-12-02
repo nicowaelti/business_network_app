@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export default function Events() {
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -56,7 +56,8 @@ export default function Events() {
   };
 
   const handleDelete = async (eventId, createdBy) => {
-    if (createdBy !== currentUser.uid) {
+    // Allow deletion if user is creator or admin
+    if (createdBy !== currentUser.uid && !isAdmin) {
       alert('Sie können nur Ihre eigenen Events löschen.');
       return;
     }
@@ -255,7 +256,7 @@ export default function Events() {
                   <p className="text-sm text-gray-600">Kontakt: {event.contactInfo}</p>
                 )}
               </div>
-              {event.createdBy === currentUser.uid && (
+              {(event.createdBy === currentUser.uid || isAdmin) && (
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEdit(event)}

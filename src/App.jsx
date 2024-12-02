@@ -131,7 +131,7 @@ const Dashboard = () => {
       </div>
       
       <div className="mb-8 p-4 bg-green-50 border-l-4 border-green-400 rounded-lg shadow-sm">
-        <h3 className="text-xl font-semibold mb-2 text-green-800">Neue Stellenangebote</h3>
+        <h3 className="text-xl font-semibold mb-2 text-green-800">Neue Projekte</h3>
         {recentJobs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentJobs.map(job => (
@@ -165,7 +165,7 @@ const Dashboard = () => {
             ))}
           </div>
         ) : (
-          <p>Keine neuen Stellenangebote in den letzten 14 Tagen.</p>
+          <p>Keine neuen Projekte in den letzten 14 Tagen.</p>
         )}
       </div>
 
