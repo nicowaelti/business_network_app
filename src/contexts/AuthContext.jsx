@@ -1,34 +1,62 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { auth, onAuthChange } from '../config/firebase';
+import { auth, getUserProfile } from '../config/firebase';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
-
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthChange((user) => {
-      setCurrentUser(user);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      console.log('Auth state changed:', user?.email);
+      if (user) {
+        try {
+          const profile = await getUserProfile(user.uid);
+          console.log('User profile loaded:', profile);
+          setCurrentUser({
+            ...user,
+            profile
+          });
+        } catch (error) {
+          console.error('Error loading user profile:', error);
+          setCurrentUser(user);
+        }
+      } else {
+        setCurrentUser(null);
+      }
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   const value = {
     currentUser,
-    isAdmin: currentUser?.email === 'nico.waelti@yahoo.de',
-    isCompany: currentUser?.email?.endsWith('@company.com'),
+    isAdmin: currentUser?.profile?.role === 'admin', // Changed from hardcoded email to role check
+    isCompany: currentUser?.profile?.profileType === 'company',
+    loading
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
-};
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}

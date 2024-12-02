@@ -1,135 +1,128 @@
 import { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { loginUser } from '../config/firebase';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
+    setError('');
 
     try {
+      console.log('Attempting login with:', email);
       await loginUser(email, password);
-      navigate('/dashboard');
+      console.log('Login successful, redirecting...');
+      
+      // Navigate to the intended page or dashboard
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     } catch (error) {
-      console.error('Login error:', error.code, error.message);
-      switch (error.code) {
-        case 'auth/user-not-found':
-          setMessage('Kein Benutzer mit dieser E-Mail-Adresse gefunden.');
-          break;
-        case 'auth/wrong-password':
-          setMessage('Falsches Passwort. Bitte versuchen Sie es erneut.');
-          break;
-        case 'auth/invalid-email':
-          setMessage('Ungültiges E-Mail-Format.');
-          break;
-        case 'auth/too-many-requests':
-          setMessage('Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut.');
-          break;
-        case 'auth/invalid-credential':
-          setMessage('Ungültige E-Mail oder Passwort. Bitte überprüfen Sie Ihre Anmeldedaten.');
-          break;
-        default:
-          setMessage(`Anmeldung fehlgeschlagen: ${error.message}`);
-      }
+      console.error('Login error:', error);
+      setError(
+        error.code === 'auth/user-not-found' ? 'Benutzer nicht gefunden.' :
+        error.code === 'auth/wrong-password' ? 'Falsches Passwort.' :
+        error.code === 'auth/invalid-credential' ? 'Ungültige Anmeldedaten.' :
+        'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="max-w-lg w-full mx-auto p-8 bg-white shadow-md rounded-lg">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Anmelden</h1>
-        {message && (
-          <div 
-            role="alert" 
-            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-center"
-          >
-            {message}
-          </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label 
-              htmlFor="email" 
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              E-Mail-Adresse
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-describedby="email-error"
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="you@example.com"
-              required
-              autoComplete="email"
-            />
-          </div>
-          <div className="relative">
-            <label 
-              htmlFor="password" 
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Passwort
-            </label>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Anmelden
+          </h2>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="rounded-md bg-red-50 p-4">
+              <div className="text-sm text-red-700">
+                {error}
+              </div>
+            </div>
+          )}
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="email-address" className="sr-only">
+                E-Mail-Adresse
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="E-Mail-Adresse"
+              />
+            </div>
             <div className="relative">
+              <label htmlFor="password" className="sr-only">
+                Passwort
+              </label>
               <input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                aria-describedby="password-error"
-                className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Passwort eingeben"
-                required
-                autoComplete="current-password"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Passwort"
               />
               <button
                 type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-                aria-label={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
               >
                 {showPassword ? (
-                  <EyeSlashIcon className="h-5 w-5" />
+                  <EyeSlashIcon className="h-5 w-5 text-gray-400" />
                 ) : (
-                  <EyeIcon className="h-5 w-5" />
+                  <EyeIcon className="h-5 w-5 text-gray-400" />
                 )}
               </button>
             </div>
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            {loading ? 'Anmeldung läuft...' : 'Anmelden'}
-          </button>
+
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <Link
+                to="/forgot-password"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                Passwort vergessen?
+              </Link>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {loading ? 'Wird angemeldet...' : 'Anmelden'}
+            </button>
+          </div>
         </form>
-        <div className="mt-6 flex justify-end text-sm">
-          <Link 
-            to="/forgot-password" 
-            className="text-gray-600 hover:text-gray-800"
-          >
-            Passwort vergessen?
-          </Link>
-        </div>
       </div>
     </div>
   );

@@ -39,33 +39,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Enable offline persistence for Firestore
-if (import.meta.env.PROD) {
-  enableIndexedDbPersistence(db)
-    .catch((err) => {
-      if (err.code === 'failed-precondition') {
-        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-      } else if (err.code === 'unimplemented') {
-        console.warn('The current browser does not support persistence.');
-      }
-    });
-}
-
-// Initialize Analytics only in production
-let analytics = null;
-if (import.meta.env.PROD) {
-  analytics = getAnalytics(app);
-}
-
 // Authentication functions
 export const loginUser = async (email, password) => {
-  console.log('Attempting to log in user:', email);
+  console.log('Starting login process for:', email);
   try {
+    // Clear any existing auth state
+    await signOut(auth);
+    console.log('Cleared existing auth state');
+
+    // Attempt login
     const result = await signInWithEmailAndPassword(auth, email, password);
-    console.log('Login successful:', result.user.uid);
+    console.log('Firebase auth successful:', result.user.uid);
+
+    // Get user profile
+    const profile = await getUserProfile(result.user.uid);
+    console.log('User profile loaded:', profile);
+
     return result;
   } catch (error) {
-    console.error('Login error details:', {
+    console.error('Login process failed:', {
       code: error.code,
       message: error.message,
       stack: error.stack
@@ -77,11 +69,9 @@ export const loginUser = async (email, password) => {
 export const registerUser = async (email, password, userType) => {
   console.log('Attempting to register user:', { email, userType });
   try {
-    // Create the user account
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     console.log('User created successfully:', userCredential.user.uid);
     
-    // Create initial profile data
     const userId = userCredential.user.uid;
     const initialProfile = {
       email,
@@ -107,17 +97,12 @@ export const registerUser = async (email, password, userType) => {
       })
     };
 
-    // Save profile to Firestore
     await setDoc(doc(db, 'users', userId), initialProfile);
     console.log('User profile created in Firestore');
 
     return userCredential;
   } catch (error) {
-    console.error('Registration error details:', {
-      code: error.code,
-      message: error.message,
-      stack: error.stack
-    });
+    console.error('Registration error:', error);
     throw error;
   }
 };
@@ -134,7 +119,11 @@ export const onAuthChange = (callback) => {
 export const getUserProfile = async (userId) => {
   try {
     const userDoc = await getDoc(doc(db, 'users', userId));
-    return userDoc.exists() ? userDoc.data() : null;
+    if (!userDoc.exists()) {
+      console.log('No profile found for user:', userId);
+      return null;
+    }
+    return userDoc.data();
   } catch (error) {
     console.error('Error getting user profile:', error);
     return null;

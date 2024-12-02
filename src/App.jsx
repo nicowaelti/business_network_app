@@ -20,8 +20,10 @@ import { useState, useEffect } from 'react';
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
   const { currentUser } = useAuth();
+  console.log('ProtectedRoute - currentUser:', currentUser?.email);
   
   if (!currentUser) {
+    console.log('No user found, redirecting to login');
     return <Navigate to="/login" />;
   }
   
@@ -256,7 +258,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* Profile routes - specific before dynamic */}
           <Route
             path="/profile/edit"
             element={
