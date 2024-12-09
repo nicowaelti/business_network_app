@@ -3,6 +3,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useParams, Navigate, useNavigate } from 'react-router-dom';
+import { MdEmail } from 'react-icons/md';
 
 export default function Profile() {
   const { currentUser } = useAuth();
@@ -103,9 +104,14 @@ export default function Profile() {
             <label className="block text-sm font-medium text-gray-600">Standort</label>
             <p className="mt-1">{profileData.location || 'Nicht angegeben'}</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-600">E-Mail</label>
-            <p className="mt-1">{profileData.email}</p>
+          <div className="flex items-center">
+            <label className="block text-sm font-medium text-gray-600 mr-2">E-Mail</label>
+            <a 
+              href={`mailto:${profileData.email}`} 
+              className="flex items-center text-green-600 hover:text-green-800 text-sm"
+            >
+              <MdEmail className="mr-1" /> {profileData.email}
+            </a>
           </div>
         </div>
       </div>
@@ -166,6 +172,15 @@ export default function Profile() {
           <div>
             <label className="block text-sm font-medium text-gray-600">Gründungsjahr</label>
             <p className="mt-1">{profileData.yearEstablished || 'Nicht angegeben'}</p>
+          </div>
+          <div className="col-span-full flex items-center">
+            <label className="block text-sm font-medium text-gray-600 mr-2">E-Mail</label>
+            <a 
+              href={`mailto:${profileData.email}`} 
+              className="flex items-center text-green-600 hover:text-green-800 text-sm"
+            >
+              <MdEmail className="mr-1" /> {profileData.email}
+            </a>
           </div>
         </div>
       </div>

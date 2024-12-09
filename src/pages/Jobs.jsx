@@ -4,6 +4,7 @@ import { collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc
 import { db, getUserProfile } from '../config/firebase';
 import { Link } from 'react-router-dom';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { MdEmail } from 'react-icons/md';
 
 export default function Jobs() {
   const { currentUser, isAdmin } = useAuth();
@@ -78,7 +79,6 @@ export default function Jobs() {
 
     try {
       if (editingJob) {
-        // Update existing job
         const jobRef = doc(db, 'jobs', editingJob.id);
         await updateDoc(jobRef, {
           ...formData,
@@ -86,7 +86,6 @@ export default function Jobs() {
         });
         alert('Job erfolgreich aktualisiert!');
       } else {
-        // Create new job
         const jobsRef = collection(db, 'jobs');
         await addDoc(jobsRef, {
           ...formData,
@@ -119,7 +118,6 @@ export default function Jobs() {
   };
 
   const handleDelete = async (jobId, createdBy) => {
-    // Allow deletion if user is creator or admin
     if (createdBy !== currentUser.uid && !isAdmin) {
       alert('Sie können nur Ihre eigenen Projekte löschen.');
       return;
@@ -349,9 +347,19 @@ export default function Jobs() {
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between">
-              <Link to={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
-                Profil des Erstellers anzeigen
-              </Link>
+              <div className="flex items-center space-x-4">
+                <Link to={`/profile/${job.createdBy}`} className="text-indigo-600 hover:text-indigo-800 text-sm">
+                  Profil des Erstellers anzeigen
+                </Link>
+                {job.contactInfo && (
+                  <a 
+                    href={`mailto:${job.contactInfo}`} 
+                    className="flex items-center text-green-600 hover:text-green-800 text-sm"
+                  >
+                    <MdEmail className="mr-1" /> Kontaktieren
+                  </a>
+                )}
+              </div>
               <Link 
                 to={`/jobs/${job.id}`}
                 className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

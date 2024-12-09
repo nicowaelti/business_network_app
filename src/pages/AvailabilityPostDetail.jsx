@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { MdEmail } from 'react-icons/md';
 
 export default function AvailabilityPostDetail() {
   const { postId } = useParams();
@@ -82,13 +83,21 @@ export default function AvailabilityPostDetail() {
             </div>
           )}
 
-          <div className="pt-4 border-t border-gray-200">
+          <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
             <Link 
               to={`/profile/${post.createdBy}`}
               className="text-indigo-600 hover:text-indigo-800"
             >
               Profil des Erstellers anzeigen
             </Link>
+            {post.contactEmail && (
+              <a 
+                href={`mailto:${post.contactEmail}`} 
+                className="flex items-center text-green-600 hover:text-green-800 text-sm"
+              >
+                <MdEmail className="mr-1" /> Kontaktieren
+              </a>
+            )}
           </div>
         </div>
       </div>

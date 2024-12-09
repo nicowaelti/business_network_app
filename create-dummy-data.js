@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -16,88 +16,44 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Function to create dummy users
-async function createDummyUsers() {
-  const users = [
-    {
-      name: 'John Doe',
-      profileType: 'freelancer',
-      title: 'Web Developer',
-      location: 'New York, USA',
-      skills: 'JavaScript, React, Node.js',
-      experience: '5 years in web development',
-      education: 'B.Sc. in Computer Science',
-      portfolio: 'https://johndoe.dev',
-    },
-    {
-      companyName: 'Tech Solutions Inc.',
-      profileType: 'company',
-      industry: 'Software Development',
-      companySize: '50-200 employees',
-      yearEstablished: '2010',
-      website: 'https://techsolutions.com',
-      services: 'Web Development, Mobile Apps',
-      products: 'Project Management Software',
-    },
-  ];
-
-  for (const user of users) {
-    await addDoc(collection(db, 'users'), user);
-  }
-}
-
-// Function to create dummy jobs
-async function createDummyJobs() {
-  const jobs = [
-    {
-      title: 'Frontend Developer',
-      companyId: 'companyId1', // Replace with actual company ID
-      type: 'Full-time',
-      location: 'Remote',
-      remoteType: 'remote_only',
-      description: 'Develop and maintain web applications.',
-      requirements: '3+ years of experience with React.',
-      salary: 'USD 70,000 - 90,000 per year',
-      createdAt: new Date(),
-    },
-    {
-      title: 'Backend Developer',
-      companyId: 'companyId2', // Replace with actual company ID
-      type: 'Contract',
-      location: 'San Francisco, USA',
-      remoteType: 'hybrid',
-      description: 'Build and maintain server-side applications.',
-      requirements: 'Experience with Node.js and Express.',
-      salary: 'USD 80,000 - 100,000 per year',
-      createdAt: new Date(),
-    },
-  ];
-
-  for (const job of jobs) {
-    await addDoc(collection(db, 'jobs'), job);
-  }
-}
-
 // Function to create dummy availability posts
 async function createDummyAvailabilityPosts() {
+  // Get current date and create dates for testing
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+  const tenDaysAgo = new Date(now.getTime() - (10 * 24 * 60 * 60 * 1000));
+  const fiveDaysAgo = new Date(now.getTime() - (5 * 24 * 60 * 60 * 1000));
+
   const availabilityPosts = [
     {
+      title: 'Recent Post - 5 days ago',
       description: 'Available for freelance web development projects.',
-      availableFrom: new Date(),
-      availableUntil: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      startDate: now.toISOString().split('T')[0],
+      endDate: new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
       location: 'Remote',
-      contactInfo: 'john.doe@example.com',
-      createdBy: 'userId1', // Replace with actual user ID
-      createdAt: new Date(),
+      contactEmail: 'john.doe@example.com',
+      createdBy: 'userId1',
+      createdAt: Timestamp.fromDate(fiveDaysAgo),
     },
     {
+      title: 'Recent Post - 10 days ago',
       description: 'Looking for part-time opportunities in data analysis.',
-      availableFrom: new Date(),
-      availableUntil: new Date(new Date().setMonth(new Date().getMonth() + 2)),
-      location: 'New York, USA',
-      contactInfo: 'jane.doe@example.com',
-      createdBy: 'userId2', // Replace with actual user ID
-      createdAt: new Date(),
+      startDate: now.toISOString().split('T')[0],
+      endDate: new Date(now.getTime() + (60 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+      location: 'Bern',
+      contactEmail: 'jane.doe@example.com',
+      createdBy: 'userId2',
+      createdAt: Timestamp.fromDate(tenDaysAgo),
+    },
+    {
+      title: 'Old Post - 30 days ago',
+      description: 'Available for consulting work.',
+      startDate: thirtyDaysAgo.toISOString().split('T')[0],
+      endDate: new Date(now.getTime() + (90 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+      location: 'Zürich',
+      contactEmail: 'consultant@example.com',
+      createdBy: 'userId3',
+      createdAt: Timestamp.fromDate(thirtyDaysAgo),
     },
   ];
 
@@ -109,10 +65,6 @@ async function createDummyAvailabilityPosts() {
 // Run the functions to create dummy data
 async function run() {
   try {
-    await createDummyUsers();
-    console.log('Dummy users created successfully.');
-    await createDummyJobs();
-    console.log('Dummy jobs created successfully.');
     await createDummyAvailabilityPosts();
     console.log('Dummy availability posts created successfully.');
   } catch (error) {
@@ -120,4 +72,4 @@ async function run() {
   }
 }
 
-run(); 
+run();

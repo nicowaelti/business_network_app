@@ -56,7 +56,7 @@ export default function Layout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <Transition.Root show={sidebarOpen} as={Fragment}>
         <Dialog as="div" className="fixed inset-0 flex z-40 md:hidden" onClose={setSidebarOpen}>
           <Transition.Child
@@ -224,12 +224,24 @@ export default function Layout({ children }) {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <main className="flex-1">
-          <div className="py-6">
+        <main className="flex-1 flex flex-col">
+          <div className="py-6 flex-grow">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
               {children}
             </div>
           </div>
+          
+          {/* Footer with Impressum link */}
+          <footer className="bg-gray-200 py-4 mt-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 text-center">
+              <Link 
+                to="/impressum" 
+                className="text-sm text-gray-600 hover:text-gray-900 hover:underline"
+              >
+                Impressum
+              </Link>
+            </div>
+          </footer>
         </main>
       </div>
     </div>
