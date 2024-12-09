@@ -22,15 +22,17 @@ import {
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
-};
+// Access the config from Vite's define
+const firebaseConfig = window.__VITE_FIREBASE_CONFIG__;
+
+if (!firebaseConfig) {
+  console.error('Firebase configuration is missing. Environment variables might not be properly set.');
+}
+
+console.log('Firebase initialization with config:', {
+  authDomain: firebaseConfig?.authDomain,
+  projectId: firebaseConfig?.projectId
+});
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -40,15 +42,29 @@ const db = getFirestore(app);
 // Authentication functions
 export const loginUser = async (email, password) => {
   try {
+    console.log('Attempting login with Firebase config:', {
+      authDomain: firebaseConfig?.authDomain,
+      projectId: firebaseConfig?.projectId
+    });
+    
     // Attempt login
     const result = await signInWithEmailAndPassword(auth, email, password);
+    console.log('Login successful, user:', result?.user?.email);
 
     // Get user profile
     const profile = await getUserProfile(result.user.uid);
+    console.log('Profile loaded:', profile ? 'success' : 'not found');
 
     return result;
   } catch (error) {
-    console.error('Login error:', error.message);
+    console.error('Login error details:', {
+      code: error.code,
+      message: error.message,
+      config: {
+        authDomain: firebaseConfig?.authDomain,
+        projectId: firebaseConfig?.projectId
+      }
+    });
     throw error;
   }
 };
