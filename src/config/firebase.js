@@ -22,24 +22,16 @@ import {
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
+// Hardcode the correct configuration for now to ensure it's using the right project
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyD8S5f73kP_yetXxV2giOe6d1Uc_i8Fcnw",
+  authDomain: "bernernetzwercher.firebaseapp.com",
+  projectId: "bernernetzwercher",
+  storageBucket: "bernernetzwercher.firebasestorage.app",
+  messagingSenderId: "13747122879",
+  appId: "1:13747122879:web:5e53600eed814d3cba0c0a",
+  measurementId: "G-SWEGYQ24MB"
 };
-
-// Validate configuration
-if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
-  console.error('Essential Firebase configuration is missing:', {
-    apiKey: !!firebaseConfig.apiKey,
-    authDomain: !!firebaseConfig.authDomain,
-    projectId: !!firebaseConfig.projectId
-  });
-}
 
 console.log('Firebase initialization with config:', {
   authDomain: firebaseConfig.authDomain,
