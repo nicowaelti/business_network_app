@@ -17,11 +17,37 @@ function Login() {
     try {
       setError('');
       setLoading(true);
-      await loginUser(email, password);
+      console.log('Attempting login for:', email);
+      const result = await loginUser(email, password);
+      console.log('Login successful, user:', result?.user?.email);
       navigate('/dashboard');
     } catch (err) {
-      setError('Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.');
-      console.error(err);
+      console.error('Detailed login error:', {
+        code: err.code,
+        message: err.message,
+        details: err
+      });
+      
+      // Provide more specific error messages based on Firebase error codes
+      switch (err.code) {
+        case 'auth/invalid-email':
+          setError('Ungültige E-Mail-Adresse.');
+          break;
+        case 'auth/user-disabled':
+          setError('Dieser Account wurde deaktiviert.');
+          break;
+        case 'auth/user-not-found':
+          setError('Kein Account mit dieser E-Mail-Adresse gefunden.');
+          break;
+        case 'auth/wrong-password':
+          setError('Falsches Passwort.');
+          break;
+        case 'auth/network-request-failed':
+          setError('Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.');
+          break;
+        default:
+          setError('Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.');
+      }
     } finally {
       setLoading(false);
     }

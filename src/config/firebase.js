@@ -40,9 +40,6 @@ const db = getFirestore(app);
 // Authentication functions
 export const loginUser = async (email, password) => {
   try {
-    // Clear any existing auth state
-    await signOut(auth);
-
     // Attempt login
     const result = await signInWithEmailAndPassword(auth, email, password);
 
