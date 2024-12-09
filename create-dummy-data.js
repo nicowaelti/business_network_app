@@ -1,15 +1,18 @@
+import { config } from 'dotenv';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
 
-// Firebase configuration
+// Load environment variables
+config();
+
 const firebaseConfig = {
-  apiKey: "AIzaSyD8S5f73kP_yetXxV2giOe6d1Uc_i8Fcnw",
-  authDomain: "bernernetzwercher.firebaseapp.com",
-  projectId: "bernernetzwercher",
-  storageBucket: "bernernetzwercher.firebasestorage.app",
-  messagingSenderId: "13747122879",
-  appId: "1:13747122879:web:5e53600eed814d3cba0c0a",
-  measurementId: "G-SWEGYQ24MB"
+  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_FIREBASE_APP_ID,
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -26,39 +29,46 @@ async function createDummyAvailabilityPosts() {
 
   const availabilityPosts = [
     {
-      title: 'Recent Post - 5 days ago',
-      description: 'Available for freelance web development projects.',
+      title: 'Sample Availability Post 1',
+      description: 'Available for web development projects',
       startDate: now.toISOString().split('T')[0],
       endDate: new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
       location: 'Remote',
-      contactEmail: 'john.doe@example.com',
-      createdBy: 'userId1',
+      contactEmail: process.env.VITE_TEST_USER_EMAIL || 'contact1@example.com',
+      createdBy: 'dummyUser1',
       createdAt: Timestamp.fromDate(fiveDaysAgo),
     },
     {
-      title: 'Recent Post - 10 days ago',
-      description: 'Looking for part-time opportunities in data analysis.',
+      title: 'Sample Availability Post 2',
+      description: 'Looking for part-time opportunities',
       startDate: now.toISOString().split('T')[0],
       endDate: new Date(now.getTime() + (60 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
       location: 'Bern',
-      contactEmail: 'jane.doe@example.com',
-      createdBy: 'userId2',
+      contactEmail: process.env.VITE_TEST_USER_EMAIL || 'contact2@example.com',
+      createdBy: 'dummyUser2',
       createdAt: Timestamp.fromDate(tenDaysAgo),
     },
     {
-      title: 'Old Post - 30 days ago',
-      description: 'Available for consulting work.',
+      title: 'Sample Availability Post 3',
+      description: 'Available for consulting work',
       startDate: thirtyDaysAgo.toISOString().split('T')[0],
       endDate: new Date(now.getTime() + (90 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
       location: 'Zürich',
-      contactEmail: 'consultant@example.com',
-      createdBy: 'userId3',
+      contactEmail: process.env.VITE_TEST_USER_EMAIL || 'contact3@example.com',
+      createdBy: 'dummyUser3',
       createdAt: Timestamp.fromDate(thirtyDaysAgo),
     },
   ];
 
+  console.log('Creating dummy availability posts...');
+  
   for (const post of availabilityPosts) {
-    await addDoc(collection(db, 'availabilityPosts'), post);
+    try {
+      await addDoc(collection(db, 'availabilityPosts'), post);
+      console.log(`Created post: ${post.title}`);
+    } catch (error) {
+      console.error(`Failed to create post ${post.title}:`, error.message);
+    }
   }
 }
 
@@ -66,9 +76,11 @@ async function createDummyAvailabilityPosts() {
 async function run() {
   try {
     await createDummyAvailabilityPosts();
-    console.log('Dummy availability posts created successfully.');
+    console.log('Dummy data creation completed successfully.');
+    process.exit(0);
   } catch (error) {
-    console.error('Error creating dummy data:', error);
+    console.error('Error creating dummy data:', error.message);
+    process.exit(1);
   }
 }
 

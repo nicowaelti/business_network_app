@@ -1,15 +1,19 @@
+import { config } from 'dotenv';
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
+// Load environment variables
+config();
+
 const firebaseConfig = {
-  apiKey: "AIzaSyD8S5f73kP_yetXxV2giOe6d1Uc_i8Fcnw",
-  authDomain: "bernernetzwercher.firebaseapp.com",
-  projectId: "bernernetzwercher",
-  storageBucket: "bernernetzwercher.firebasestorage.app",
-  messagingSenderId: "13747122879",
-  appId: "1:13747122879:web:5e53600eed814d3cba0c0a",
-  measurementId: "G-SWEGYQ24MB"
+  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.VITE_FIREBASE_APP_ID,
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -17,12 +21,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Admin user credentials
+// Validate environment variables
+if (!process.env.VITE_ADMIN_USER_EMAIL || !process.env.VITE_ADMIN_USER_PASSWORD) {
+  console.error('Error: Admin credentials not found in environment variables.');
+  console.log('Please ensure VITE_ADMIN_USER_EMAIL and VITE_ADMIN_USER_PASSWORD are set in your .env file');
+  process.exit(1);
+}
+
+// Admin user configuration from environment variables
 const adminUser = {
-  email: 'admin@example.com',
-  password: 'Admin123!',
+  email: process.env.VITE_ADMIN_USER_EMAIL,
+  password: process.env.VITE_ADMIN_USER_PASSWORD,
   profileData: {
-    name: 'Admin User',
+    name: 'Admin Account',
     profileType: 'admin',
     role: 'admin',
     createdAt: new Date().toISOString()
@@ -50,24 +61,19 @@ const adminUser = {
       uid: userCredential.user.uid
     });
     
-    console.log('Firestore profile created successfully');
-    console.log('Admin user created with credentials:');
+    console.log('Admin user created successfully');
     console.log('Email:', adminUser.email);
-    console.log('Password:', adminUser.password);
     
     // Exit the process after successful creation
     process.exit(0);
   } catch (error) {
     console.error('Error details:', {
       code: error.code,
-      message: error.message,
-      stack: error.stack
+      message: error.message
     });
     
     if (error.code === 'auth/email-already-in-use') {
-      console.log('\nAdmin user already exists. You can use these credentials to log in:');
-      console.log('Email:', adminUser.email);
-      console.log('Password:', adminUser.password);
+      console.log('\nAdmin user already exists with the provided email.');
       process.exit(0);
     } else {
       console.error('\nFailed to create admin user');
