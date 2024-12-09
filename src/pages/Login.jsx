@@ -78,22 +78,13 @@ function Login() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div className="flex items-center justify-end">
+            <div className="text-sm">
               <Link 
                 to="/forgot-password" 
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 Passwort vergessen?
-              </Link>
-            </div>
-
-            <div className="text-sm">
-              <Link 
-                to="/register" 
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                Registrieren
               </Link>
             </div>
           </div>
