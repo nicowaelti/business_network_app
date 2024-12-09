@@ -22,16 +22,28 @@ import {
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
-// Access the config from Vite's define
-const firebaseConfig = window.__VITE_FIREBASE_CONFIG__;
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+};
 
-if (!firebaseConfig) {
-  console.error('Firebase configuration is missing. Environment variables might not be properly set.');
+// Validate configuration
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.error('Essential Firebase configuration is missing:', {
+    apiKey: !!firebaseConfig.apiKey,
+    authDomain: !!firebaseConfig.authDomain,
+    projectId: !!firebaseConfig.projectId
+  });
 }
 
 console.log('Firebase initialization with config:', {
-  authDomain: firebaseConfig?.authDomain,
-  projectId: firebaseConfig?.projectId
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId
 });
 
 // Initialize Firebase
@@ -43,8 +55,8 @@ const db = getFirestore(app);
 export const loginUser = async (email, password) => {
   try {
     console.log('Attempting login with Firebase config:', {
-      authDomain: firebaseConfig?.authDomain,
-      projectId: firebaseConfig?.projectId
+      authDomain: firebaseConfig.authDomain,
+      projectId: firebaseConfig.projectId
     });
     
     // Attempt login
@@ -61,8 +73,8 @@ export const loginUser = async (email, password) => {
       code: error.code,
       message: error.message,
       config: {
-        authDomain: firebaseConfig?.authDomain,
-        projectId: firebaseConfig?.projectId
+        authDomain: firebaseConfig.authDomain,
+        projectId: firebaseConfig.projectId
       }
     });
     throw error;
