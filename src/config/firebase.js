@@ -22,20 +22,21 @@ import {
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
-// Hardcode the correct configuration for now to ensure it's using the right project
 const firebaseConfig = {
-  apiKey: "AIzaSyD8S5f73kP_yetXxV2giOe6d1Uc_i8Fcnw",
-  authDomain: "bernernetzwercher.firebaseapp.com",
-  projectId: "bernernetzwercher",
-  storageBucket: "bernernetzwercher.firebasestorage.app",
-  messagingSenderId: "13747122879",
-  appId: "1:13747122879:web:5e53600eed814d3cba0c0a",
-  measurementId: "G-SWEGYQ24MB"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 console.log('Firebase initialization with config:', {
   authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId
+  projectId: firebaseConfig.projectId,
+  apiKey: firebaseConfig.apiKey ? 'present' : 'missing',
+  storageBucket: firebaseConfig.storageBucket
 });
 
 // Initialize Firebase
@@ -73,16 +74,32 @@ export const loginUser = async (email, password) => {
   }
 };
 
-export const registerUser = async (email, password, userType) => {
+export const registerUser = async (email, password, userType, isAdminCreating = false) => {
+  console.log('Starting user registration:', { 
+    email, 
+    userType, 
+    isAdminCreating,
+    authConfig: {
+      apiKey: firebaseConfig.apiKey ? 'present' : 'missing',
+      authDomain: firebaseConfig.authDomain,
+      projectId: firebaseConfig.projectId
+    }
+  });
+  
   try {
+    // Create the user in Firebase Auth
+    console.log('Attempting to create user in Firebase Auth...');
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('User created successfully in Auth:', userCredential.user.uid);
     
     const userId = userCredential.user.uid;
+    
+    // Prepare the initial profile
     const initialProfile = {
       email,
       createdAt: new Date().toISOString(),
       profileType: userType === 'company' ? 'company' : 'freelancer',
-      role: 'user',
+      role: 'user', // Default role is user
       ...(userType === 'company' ? {
         companyName: '',
         industry: '',
@@ -102,11 +119,61 @@ export const registerUser = async (email, password, userType) => {
       })
     };
 
-    await setDoc(doc(db, 'users', userId), initialProfile);
+    console.log('Attempting to create user profile in Firestore...');
+
+    try {
+      // Create the user profile in Firestore
+      await setDoc(doc(db, 'users', userId), initialProfile);
+      console.log('User profile created successfully in Firestore');
+    } catch (firestoreError) {
+      console.error('Firestore profile creation error:', {
+        code: firestoreError.code,
+        message: firestoreError.message,
+        details: firestoreError
+      });
+      
+      // If Firestore fails, we should delete the auth user to maintain consistency
+      try {
+        console.log('Rolling back auth user creation...');
+        await deleteUser(userCredential.user);
+        console.log('Auth user deleted successfully during rollback');
+      } catch (rollbackError) {
+        console.error('Error during auth user rollback:', rollbackError);
+      }
+      
+      throw firestoreError;
+    }
 
     return userCredential;
   } catch (error) {
-    console.error('Registration error:', error.message);
+    console.error('Registration error details:', {
+      code: error.code,
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      additionalInfo: error
+    });
+    
+    // Translate Firebase error codes to user-friendly messages
+    let errorMessage = 'Registrierung fehlgeschlagen. ';
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        errorMessage += 'Diese E-Mail-Adresse wird bereits verwendet.';
+        break;
+      case 'auth/invalid-email':
+        errorMessage += 'Ungültige E-Mail-Adresse.';
+        break;
+      case 'auth/operation-not-allowed':
+        errorMessage += 'E-Mail/Passwort-Anmeldung ist nicht aktiviert.';
+        break;
+      case 'auth/weak-password':
+        errorMessage += 'Das Passwort ist zu schwach.';
+        break;
+      default:
+        errorMessage += 'Bitte versuchen Sie es erneut.';
+    }
+    
+    error.userMessage = errorMessage;
     throw error;
   }
 };
@@ -128,7 +195,7 @@ export const getUserProfile = async (userId) => {
     }
     return userDoc.data();
   } catch (error) {
-    console.error('Error getting user profile:', error.message);
+    console.error('Error getting user profile:', error);
     return null;
   }
 };
@@ -141,7 +208,7 @@ export const updateUserProfile = async (userId, profileData) => {
     }, { merge: true });
     return true;
   } catch (error) {
-    console.error('Error updating user profile:', error.message);
+    console.error('Error updating user profile:', error);
     throw error;
   }
 };
@@ -155,7 +222,7 @@ export const getAllUsers = async () => {
       ...doc.data()
     }));
   } catch (error) {
-    console.error('Error fetching users:', error.message);
+    console.error('Error fetching users:', error);
     throw error;
   }
 };
@@ -168,7 +235,7 @@ export const updateUserRole = async (userId, newRole) => {
     }, { merge: true });
     return true;
   } catch (error) {
-    console.error('Error updating user role:', error.message);
+    console.error('Error updating user role:', error);
     throw error;
   }
 };
@@ -178,7 +245,7 @@ export const deleteUserData = async (userId) => {
     await deleteDoc(doc(db, 'users', userId));
     return true;
   } catch (error) {
-    console.error('Error deleting user data:', error.message);
+    console.error('Error deleting user data:', error);
     throw error;
   }
 };
@@ -188,7 +255,7 @@ export const resetUserPassword = async (email) => {
     await sendPasswordResetEmail(auth, email);
     return true;
   } catch (error) {
-    console.error('Error sending password reset email:', error.message);
+    console.error('Error sending password reset email:', error);
     throw error;
   }
 };

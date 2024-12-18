@@ -71,7 +71,8 @@ export default function Admin() {
   };
 
   const handleAddUser = () => {
-    navigate('/register');
+    console.log('Navigating to create user page');
+    navigate('/admin/create-user');
   };
 
   if (!isAdmin) return null;

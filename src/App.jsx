@@ -69,6 +69,14 @@ function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="/admin/create-user"
+            element={
+              <AdminRoute>
+                <Register isAdminCreating={true} />
+              </AdminRoute>
+            }
+          />
 
           {/* Protected Routes */}
           <Route
