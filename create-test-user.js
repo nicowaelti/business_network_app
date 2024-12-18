@@ -1,10 +1,26 @@
+// @ts-check
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { config } from 'dotenv';
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
-// Load environment variables
-config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables from the correct path
+config({ path: '.env' });
+
+// Log all environment variables to debug
+console.log('Environment variables:', {
+  VITE_FIREBASE_API_KEY: process.env.VITE_FIREBASE_API_KEY ? 'present' : 'missing',
+  VITE_FIREBASE_AUTH_DOMAIN: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+  VITE_FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID,
+  VITE_FIREBASE_STORAGE_BUCKET: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+  VITE_FIREBASE_MESSAGING_SENDER_ID: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? 'present' : 'missing',
+  VITE_FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID ? 'present' : 'missing'
+});
 
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY,
@@ -16,22 +32,23 @@ const firebaseConfig = {
   measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Log configuration (without sensitive data)
+console.log('Firebase configuration:', {
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId,
+  hasApiKey: !!firebaseConfig.apiKey
+});
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Validate environment variables
-if (!process.env.VITE_TEST_USER_EMAIL || !process.env.VITE_TEST_USER_PASSWORD) {
-  console.error('Error: Test user credentials not found in environment variables.');
-  console.log('Please ensure VITE_TEST_USER_EMAIL and VITE_TEST_USER_PASSWORD are set in your .env file');
-  process.exit(1);
-}
-
-// Test user configuration from environment variables
+// Generate a unique email for testing
+const timestamp = new Date().getTime();
 const testUser = {
-  email: process.env.VITE_TEST_USER_EMAIL,
-  password: process.env.VITE_TEST_USER_PASSWORD,
+  email: `test${timestamp}@example.com`,
+  password: 'Test123!',
   profileData: {
     name: 'Test Account',
     profileType: 'freelancer',
@@ -41,49 +58,52 @@ const testUser = {
     experience: 'Test experience',
     education: 'Test education',
     portfolio: 'https://example.com',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    role: 'user'
   }
 };
 
-// Wrap the execution in an async IIFE
+console.log('Using test email:', testUser.email);
+
+// Test both creation and login
 (async () => {
   try {
-    console.log('Creating test user...');
+    console.log('Step 1: Creating test user...');
     
-    // Create user in Firebase Auth
+    // Create user
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       testUser.email,
       testUser.password
     );
+    console.log('User created successfully:', userCredential.user.uid);
     
-    console.log('Auth user created successfully');
-    
-    // Add user profile to Firestore
+    // Add user profile
     await setDoc(doc(db, 'users', userCredential.user.uid), {
       ...testUser.profileData,
       email: testUser.email,
-      uid: userCredential.user.uid,
-      role: 'user'
+      uid: userCredential.user.uid
     });
+    console.log('User profile created successfully');
+
+    console.log('\nStep 2: Testing login...');
     
-    console.log('Test user created successfully');
-    console.log('Email:', testUser.email);
+    // Test login
+    const loginResult = await signInWithEmailAndPassword(
+      auth,
+      testUser.email,
+      testUser.password
+    );
+    console.log('Login successful:', loginResult.user.email);
     
-    // Exit the process after successful creation
+    console.log('\nAll tests completed successfully');
     process.exit(0);
   } catch (error) {
-    console.error('Error details:', {
+    console.error('\nError details:', {
       code: error.code,
-      message: error.message
+      message: error.message,
+      stack: error.stack
     });
-    
-    if (error.code === 'auth/email-already-in-use') {
-      console.log('\nTest user already exists with the provided email.');
-      process.exit(0);
-    } else {
-      console.error('\nFailed to create test user');
-      process.exit(1);
-    }
+    process.exit(1);
   }
 })();

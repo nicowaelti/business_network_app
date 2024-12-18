@@ -28,19 +28,82 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Log Firebase configuration (without sensitive data)
+console.log('Firebase initialization with config:', {
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId,
+  hasApiKey: !!firebaseConfig.apiKey,
+  storageBucket: firebaseConfig.storageBucket,
+  env: {
+    hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+    hasAuthDomain: !!import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID
+  }
+});
+
+// Check if required configuration is present
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.error('Missing required Firebase configuration:', {
+    hasApiKey: !!firebaseConfig.apiKey,
+    hasAuthDomain: !!firebaseConfig.authDomain,
+    hasProjectId: !!firebaseConfig.projectId
+  });
+  throw new Error('Missing required Firebase configuration');
+}
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+  console.log('Firebase initialized successfully');
+} catch (error) {
+  console.error('Error initializing Firebase:', error);
+  throw error;
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Authentication functions
 export const loginUser = async (email, password) => {
+  console.log('Attempting login with config:', {
+    authDomain: firebaseConfig.authDomain,
+    projectId: firebaseConfig.projectId,
+    email: email // don't log passwords
+  });
+
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
+    console.log('Login successful for:', result.user.email);
+    
+    // Get user profile
     const profile = await getUserProfile(result.user.uid);
+    console.log('Profile loaded:', profile ? 'success' : 'not found');
+
+    if (!profile) {
+      console.warn('No profile found for user:', result.user.email);
+    }
+
     return result;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', {
+      code: error.code,
+      message: error.message,
+      email: email,
+      authConfig: {
+        hasAuth: !!auth,
+        authDomain: firebaseConfig.authDomain,
+        projectId: firebaseConfig.projectId
+      }
+    });
+
+    // Remap certain Firebase errors for better handling
+    if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+      const newError = new Error('Invalid email or password');
+      newError.code = 'auth/invalid-credential';
+      throw newError;
+    }
+
     throw error;
   }
 };

@@ -18,6 +18,12 @@ function Login() {
       setError('');
       setLoading(true);
       console.log('Attempting login for:', email);
+      console.log('Firebase config check:', {
+        hasAuth: !!window.auth,
+        authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+        projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID
+      });
+      
       const result = await loginUser(email, password);
       console.log('Login successful, user:', result?.user?.email);
       navigate('/dashboard');
@@ -41,6 +47,9 @@ function Login() {
           break;
         case 'auth/wrong-password':
           setError('Falsches Passwort.');
+          break;
+        case 'auth/invalid-credential':
+          setError('Ungültige Anmeldedaten. Bitte überprüfen Sie Ihre E-Mail und Ihr Passwort.');
           break;
         case 'auth/network-request-failed':
           setError('Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.');

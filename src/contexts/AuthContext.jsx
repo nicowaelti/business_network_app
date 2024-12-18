@@ -10,19 +10,27 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       console.log('Auth state changed:', user?.email);
+      
       if (user) {
         try {
           const profile = await getUserProfile(user.uid);
           console.log('User profile loaded:', profile);
+          
+          if (!profile) {
+            console.warn('No profile found for authenticated user:', user.email);
+          }
+          
           setCurrentUser({
             ...user,
             profile
           });
         } catch (error) {
           console.error('Error loading user profile:', error);
+          // Still set the user even if profile loading fails
           setCurrentUser(user);
         }
       } else {
+        console.log('User logged out or no user found');
         setCurrentUser(null);
       }
       setLoading(false);
@@ -33,7 +41,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     currentUser,
-    isAdmin: currentUser?.profile?.role === 'admin', // Changed from hardcoded email to role check
+    isAdmin: currentUser?.profile?.role === 'admin',
     isCompany: currentUser?.profile?.profileType === 'company',
     loading
   };
