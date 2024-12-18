@@ -6,7 +6,9 @@ import {
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
-  deleteUser
+  deleteUser,
+  browserLocalPersistence,
+  setPersistence
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -42,7 +44,30 @@ console.log('Firebase initialization with config:', {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Set persistence to local to help with Safari
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log('Firebase persistence set to local');
+  })
+  .catch((error) => {
+    console.error('Error setting persistence:', error);
+  });
+
 const db = getFirestore(app);
+
+// Enable offline persistence for Firestore
+enableIndexedDbPersistence(db)
+  .then(() => {
+    console.log('Firestore persistence enabled');
+  })
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+    } else if (err.code === 'unimplemented') {
+      console.warn('The current browser does not support persistence.');
+    }
+  });
 
 // Authentication functions
 export const loginUser = async (email, password) => {
@@ -119,7 +144,7 @@ export const registerUser = async (email, password, userType, isAdminCreating = 
       })
     };
 
-    console.log('Attempting to create user profile in Firestore...');
+    console.log('Creating user profile in Firestore...');
 
     try {
       // Create the user profile in Firestore
@@ -259,6 +284,14 @@ export const resetUserPassword = async (email) => {
     throw error;
   }
 };
+
+// Initialize analytics
+try {
+  const analytics = getAnalytics(app);
+  console.log('Firebase Analytics initialized');
+} catch (error) {
+  console.warn('Firebase Analytics initialization failed:', error);
+}
 
 // Export instances
 export { auth, db };
