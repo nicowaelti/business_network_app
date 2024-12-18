@@ -22,8 +22,11 @@ import Admin from './pages/Admin';
 import Impressum from './pages/Impressum';
 
 function App() {
+  // Get the base URL from the environment or default to '/'
+  const baseUrl = import.meta.env.BASE_URL || '/';
+
   return (
-    <Router>
+    <Router basename={baseUrl}>
       <AuthProvider>
         <Routes>
           {/* Public Routes */}
