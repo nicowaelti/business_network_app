@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -18,98 +18,30 @@ import {
   collection
 } from 'firebase/firestore';
 
-// Force clear any existing Firebase apps
-if (getApps().length) {
-  console.log('Existing Firebase app found, removing...');
-  getApps().forEach(app => app.delete());
-}
-
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyD8S5f73kP_yetXxV2giOe6d1Uc_i8Fcnw",
+  authDomain: "bernernetzwercher.firebaseapp.com",
+  projectId: "bernernetzwercher",
+  storageBucket: "bernernetzwercher.appspot.com",
+  messagingSenderId: "13747122879",
+  appId: "1:13747122879:web:5e53600eed814d3cba0c0a",
+  measurementId: "G-SWEGYQ24MB"
 };
 
-// Validate configuration
-console.log('Environment variables:', {
-  VITE_FIREBASE_AUTH_DOMAIN: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  VITE_FIREBASE_PROJECT_ID: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  VITE_FIREBASE_STORAGE_BUCKET: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY
-});
-
-// Log Firebase configuration (without sensitive data)
-console.log('Firebase initialization with config:', {
-  authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId,
-  hasApiKey: !!firebaseConfig.apiKey,
-  storageBucket: firebaseConfig.storageBucket
-});
-
-// Validate bernernetzwercher configuration
-if (firebaseConfig.projectId !== 'bernernetzwercher' || 
-    !firebaseConfig.authDomain.includes('bernernetzwercher')) {
-  console.error('Invalid Firebase project configuration. Expected bernernetzwercher project.');
-  throw new Error('Invalid Firebase project configuration');
-}
-
 // Initialize Firebase
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-  console.log('Firebase initialized successfully with project:', app.options.projectId);
-} catch (error) {
-  console.error('Error initializing Firebase:', error);
-  throw error;
-}
-
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Authentication functions
 export const loginUser = async (email, password) => {
-  console.log('Attempting login with config:', {
-    authDomain: firebaseConfig.authDomain,
-    projectId: firebaseConfig.projectId,
-    email: email // don't log passwords
-  });
-
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    console.log('Login successful for:', result.user.email);
-    
-    // Get user profile
     const profile = await getUserProfile(result.user.uid);
-    console.log('Profile loaded:', profile ? 'success' : 'not found');
-
-    if (!profile) {
-      console.warn('No profile found for user:', result.user.email);
-    }
-
     return result;
   } catch (error) {
-    console.error('Login error:', {
-      code: error.code,
-      message: error.message,
-      email: email,
-      authConfig: {
-        hasAuth: !!auth,
-        authDomain: firebaseConfig.authDomain,
-        projectId: firebaseConfig.projectId
-      }
-    });
-
-    // Remap certain Firebase errors for better handling
-    if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-      const newError = new Error('Invalid email or password');
-      newError.code = 'auth/invalid-credential';
-      throw newError;
-    }
-
+    console.error('Login error:', error);
     throw error;
   }
 };
