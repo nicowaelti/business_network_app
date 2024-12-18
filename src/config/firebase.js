@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   getAuth, 
   signInWithEmailAndPassword, 
@@ -18,6 +18,12 @@ import {
   collection
 } from 'firebase/firestore';
 
+// Force clear any existing Firebase apps
+if (getApps().length) {
+  console.log('Existing Firebase app found, removing...');
+  getApps().forEach(app => app.delete());
+}
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -28,34 +34,34 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Validate configuration
+console.log('Environment variables:', {
+  VITE_FIREBASE_AUTH_DOMAIN: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  VITE_FIREBASE_PROJECT_ID: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  VITE_FIREBASE_STORAGE_BUCKET: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY
+});
+
 // Log Firebase configuration (without sensitive data)
 console.log('Firebase initialization with config:', {
   authDomain: firebaseConfig.authDomain,
   projectId: firebaseConfig.projectId,
   hasApiKey: !!firebaseConfig.apiKey,
-  storageBucket: firebaseConfig.storageBucket,
-  env: {
-    hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-    hasAuthDomain: !!import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID
-  }
+  storageBucket: firebaseConfig.storageBucket
 });
 
-// Check if required configuration is present
-if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
-  console.error('Missing required Firebase configuration:', {
-    hasApiKey: !!firebaseConfig.apiKey,
-    hasAuthDomain: !!firebaseConfig.authDomain,
-    hasProjectId: !!firebaseConfig.projectId
-  });
-  throw new Error('Missing required Firebase configuration');
+// Validate bernernetzwercher configuration
+if (firebaseConfig.projectId !== 'bernernetzwercher' || 
+    !firebaseConfig.authDomain.includes('bernernetzwercher')) {
+  console.error('Invalid Firebase project configuration. Expected bernernetzwercher project.');
+  throw new Error('Invalid Firebase project configuration');
 }
 
 // Initialize Firebase
 let app;
 try {
   app = initializeApp(firebaseConfig);
-  console.log('Firebase initialized successfully');
+  console.log('Firebase initialized successfully with project:', app.options.projectId);
 } catch (error) {
   console.error('Error initializing Firebase:', error);
   throw error;
