@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AdminRoute } from './routes/AdminRoute';
@@ -22,8 +22,11 @@ import Admin from './pages/Admin';
 import Impressum from './pages/Impressum';
 
 function App() {
+  // Get the base URL from the environment or default to '/'
+  const baseUrl = import.meta.env.BASE_URL || '/';
+
   return (
-    <Router>
+    <Router basename={baseUrl}>
       <AuthProvider>
         <Routes>
           {/* Public Routes */}

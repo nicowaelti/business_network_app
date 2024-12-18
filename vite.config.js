@@ -13,8 +13,21 @@ export default defineConfig({
           vendor: ['react', 'react-dom', 'react-router-dom']
         }
       }
-    }
+    },
+    // Ensure static files are copied
+    assetsDir: 'assets',
+    copyPublicDir: true
   },
-  base: '/',
-  publicDir: 'public'
+  server: {
+    // Development server configuration
+    port: 5173,
+    strictPort: true,
+    host: true
+  },
+  preview: {
+    // Preview server configuration
+    port: 5173,
+    strictPort: true,
+    host: true
+  }
 })
